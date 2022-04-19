@@ -1,0 +1,17 @@
+<library path="lib/librqt_engagement_radar">
+    <class type="rqt_engagement_radar::Radar" base_class_type="rqt_gui_cpp::Plugin">
+        <description>
+            A radar-like visualization for humans in the scene, representing their engagement level.
+        </description>
+        <qtgui>
+            <group>
+                <label>ROS4HRI</label>
+                <icon type="theme">folder</icon>
+                <statustip></statustip>
+            </group>
+            <label>rqt_engagement_radar</label>
+            <icon type="theme">applications-graphics</icon>
+            <statustip></statustip>
+        </qtgui>
+    </class>
+</library>

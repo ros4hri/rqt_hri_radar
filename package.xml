@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rqt_engagement_radar</name>
+  <version>0.0.1</version>
+  <description>A radar-like visualization for humans in the scene, representing their engagement level</description>
+
+  <author email="lorenzo.ferrini@pal-robotics.com">Lorenzo Ferrini</author>
+  <maintainer email="lorenzo.ferrini@pal-robotics.com">Lorenzo Ferrini</maintainer>
+
+  <license>BSD</license> <!-- To change -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rqt_gui</depend>
+  <depend>rqt_gui_cpp</depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <architecture_independent/>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>
