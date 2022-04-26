@@ -4,10 +4,14 @@
 #include <QGridLayout>
 #include <QStringList>
 
+#include <QPainter>
+#include <rqt_engagement_radar/RadarCanvas.hpp>
+
 namespace rqt_engagement_radar {
 
 Radar::Radar()
-    : rqt_gui_cpp::Plugin(){
+    : rqt_gui_cpp::Plugin(),
+      widget_(0){
   // Constructor is called first before initPlugin function, needless to say.
 
   // give QObjects reasonable names
@@ -18,6 +22,9 @@ Radar::~Radar() {
 }
 
 void Radar::initPlugin(qt_gui_cpp::PluginContext &context) {
+  
+  widget_ = new RadarCanvas();
+  context.addWidget(widget_);
 }
 
 void Radar::shutdownPlugin() {

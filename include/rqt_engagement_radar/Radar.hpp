@@ -1,5 +1,5 @@
-#ifndef RQT_ENGAGEMENT_RADAR_RADAR_HPP
-#define RQT_ENGAGEMENT_RADAR_RADAR_HPP
+#ifndef RQT_ENGAGEMENT_RADAR__RADAR_HPP
+#define RQT_ENGAGEMENT_RADAR__RADAR_HPP
 
 #include <QStringList>
 #include <rqt_gui_cpp/plugin.h>
@@ -27,8 +27,9 @@ class Radar : public rqt_gui_cpp::Plugin {
   //void triggerConfiguration();
 
  private:
+  QWidget* widget_;
 };
 
 } /* namespace */
 
-#endif /* RQT_TEMPLATE_PLUGIN_TEMPLATEPLUGIN_HPP */
+#endif /* RQT_ENGAGEMENT_RADAR__RADAR_HPP */

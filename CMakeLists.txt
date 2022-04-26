@@ -21,6 +21,7 @@ endif ()
 ###########
 set(rqt_engagement_radar_SRCS
         src/rqt_engagement_radar/Radar.cpp
+        src/rqt_engagement_radar/RadarCanvas.cpp
         )
 ###########
 
@@ -30,6 +31,7 @@ set(rqt_engagement_radar_SRCS
 ###########
 set(rqt_engagement_radar_HDRS
         include/rqt_engagement_radar/Radar.hpp
+        include/rqt_engagement_radar/RadarCanvas.hpp
         )
 ###########
 
@@ -37,9 +39,9 @@ set(rqt_engagement_radar_HDRS
 ############
 # ui files #
 ############
-# set(rqt_engagement_radar_UIS
-#         resource/Radar.ui
-#         )
+set(rqt_engagement_radar_UIS
+         resource/radar_canvas.ui
+         )
 ############
 
 set(rqt_engagement_radar_INCLUDE_DIRECTORIES
