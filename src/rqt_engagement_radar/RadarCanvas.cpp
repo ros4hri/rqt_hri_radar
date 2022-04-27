@@ -7,13 +7,14 @@
 #include <QPainter>
 #include <QRectF>
 #include <cmath>
+#include <QString>
+#include <QTransform>
 
+// ROS Utilities
+#include <ros/package.h>
+#include <ros/console.h>
 
 namespace rqt_engagement_radar {
-
-/*****************************************************************************/
-/* Constructors and Destructor                                               */
-/*****************************************************************************/
 
 RadarCanvas::RadarCanvas(QWidget *parent) :
     QWidget(parent),
@@ -22,6 +23,29 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   
   image = QImage(QSize(800, 600), QImage::Format_RGB32);
   image.fill(qRgb(255, 255, 255));
+
+  // Retrieving robot and person icons
+  package = ros::package::getPath("rqt_engagement_radar");
+  robotImageFile = package + "/img/ARI_icon.png";
+  personImageFile = package + "/img/Person_icon.png";
+  robotImageFound = robotImage.load(QString::fromStdString(robotImageFile));
+  personImageFound = personImage.load(QString::fromStdString(personImageFile));
+
+  if (!robotImageFound){
+    ROS_WARN("Robot icon not found");
+  }
+  else{
+    // Rotating image
+    QTransform tr;
+    tr.rotate(-50);
+    robotImage = robotImage.transformed(tr);
+  }
+
+  if(!personImageFound){
+    ROS_WARN("Person icon not found");
+  }else{
+    personImage = personImage.scaledToHeight(70);
+  }
   
   QPainter painter(&image);
   painter.drawImage(QPoint(0, 0), image);
@@ -29,12 +53,13 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   connect(ui_->fovConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeDegChanged);
   connect(ui_->attentionConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeDegChanged);
 
-  detectorLength = 400;
+  detectorLength = 300; // TODO: allowing the user to set this value
   xOffset = 50; // Random value
-  yOffset = 300; // Image length (in this case 600) / 2 ==> 3000
+  yOffset = 300; // Image length (in this case 600) / 2 ==> 300
 
   fovPen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
   attentionPen = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+  rangePen = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 
   update();
 }
@@ -78,8 +103,17 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
   painter.drawPie(fovRectangle, attentionStartAngle, attentionSpanAngle);
 
-  //std::cout<<fovRectOriginX<<"\t"<<fovRectOriginY<<"\t"<<sin(fovAmpl/360*M_PI)<<std::endl;
-  //std::cout<<fovStartAngle<<"\t"<<fovSpanAngle<<"\t"<<std::endl;
+  QRectF range1(QPoint(fovRectOriginX + detectorLength/2, fovRectOriginY + detectorLength/2), QSize(detectorLength, detectorLength));
+  QRectF range2(QPoint(fovRectOriginX + detectorLength/4, fovRectOriginY + detectorLength/4), QSize(detectorLength*3/2, detectorLength*3/2));
+
+  painter.setPen(rangePen);
+  painter.drawEllipse(range1);
+  painter.drawEllipse(range2);
+
+  painter.drawImage(QRectF(QPointF(xOffset-50, yOffset-50), QPointF(xOffset+50, yOffset+50)), robotImage);
+  //painter.drawImage(QRectF(QPointF(xOffset+100, yOffset-30), QSize(70, 70)), personImage);
+  painter.drawImage(QPoint(200, 265), personImage);
+
 }
 
 } /* namespace */

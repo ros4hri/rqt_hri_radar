@@ -13,6 +13,8 @@
 
 #include <QLine>
 
+#include <ros/ros.h>
+
 namespace Ui {
 class RadarCanvas;
 };
@@ -37,13 +39,17 @@ class RadarCanvas :
     private:
         Ui::RadarCanvas *ui_;
 
+        ros::NodeHandle nh;
+
         // Holds the current pen width & color
-        int myPenWidth;
-        QColor myPenColor;
-        QPen fovPen, attentionPen;
+        QPen fovPen, attentionPen, rangePen;
 
         // Stores the image being drawn
         QImage image;
+        QImage robotImage, personImage;
+        bool robotImageFound, personImageFound;
+        std::string package, robotImageFile, personImageFile;
+        std::map<std::string, std::vector<std::string>> peoplePosition;
 
         // Cones amplitude
         double fovAmpl, attentionAmpl;
