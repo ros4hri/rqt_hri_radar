@@ -22,8 +22,8 @@ Radar::~Radar() {
 }
 
 void Radar::initPlugin(qt_gui_cpp::PluginContext &context) {
-  
   widget_ = new RadarCanvas();
+  widget_->setMinimumSize(600, 812);
   context.addWidget(widget_);
 }
 

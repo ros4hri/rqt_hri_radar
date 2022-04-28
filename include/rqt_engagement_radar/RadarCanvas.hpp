@@ -30,11 +30,13 @@ class RadarCanvas :
  
     public slots:
         void fovConeDegChanged();
+        void fovConeRangeChanged();
         void attentionConeDegChanged();
+        void attentionConeRangeChanged();
 
     protected:
-        // Updates the scribble area where we are painting
         void paintEvent(QPaintEvent *event) override;
+        void resizeEvent(QResizeEvent *event) override;
 
     private:
         Ui::RadarCanvas *ui_;
@@ -45,11 +47,11 @@ class RadarCanvas :
         QPen fovPen, attentionPen, rangePen;
 
         // Stores the image being drawn
-        QImage image;
+        QImage background; // TODO: evaluating different styles rather than just fully white background
         QImage robotImage, personImage;
         bool robotImageFound, personImageFound;
         std::string package, robotImageFile, personImageFile;
-        std::map<std::string, std::vector<std::string>> peoplePosition;
+        std::map<std::string, std::vector<double>> peoplePosition;
 
         // Cones amplitude
         double fovAmpl, attentionAmpl;
@@ -59,9 +61,11 @@ class RadarCanvas :
         double xOffset, yOffset;
         double fovRectOriginX, fovRectOriginY; 
         double fovX, fovY;
+        double attentionRectOriginX, attentionRectOriginY;
         double attentionX, attentionY;
         double fovStartAngle, fovSpanAngle; 
         double attentionStartAngle, attentionSpanAngle;
+        double fovRange, attentionRange, circleRange;
 };
 
 } /* namespace */

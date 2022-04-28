@@ -20,9 +20,9 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::RadarCanvas()) {
   ui_->setupUi(this);
-  
-  image = QImage(QSize(800, 600), QImage::Format_RGB32);
-  image.fill(qRgb(255, 255, 255));
+
+  background = QImage(QSize(this->size().width(), 600), QImage::Format_RGB32);
+  background.fill(qRgb(255, 255, 255));   
 
   // Retrieving robot and person icons
   package = ros::package::getPath("rqt_engagement_radar");
@@ -47,13 +47,17 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
     personImage = personImage.scaledToHeight(70);
   }
   
-  QPainter painter(&image);
-  painter.drawImage(QPoint(0, 0), image);
+  QPainter painter(&background);
+  painter.drawImage(QPoint(0, 0), background);
 
   connect(ui_->fovConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeDegChanged);
+  connect(ui_->fovRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeRangeChanged);
   connect(ui_->attentionConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeDegChanged);
+  connect(ui_->attentionRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeRangeChanged);
 
-  detectorLength = 300; // TODO: allowing the user to set this value
+  circleRange = 300; 
+  fovRange = 400;
+  attentionRange = 300;
   xOffset = 50; // Random value
   yOffset = 300; // Image length (in this case 600) / 2 ==> 300
 
@@ -75,8 +79,18 @@ void RadarCanvas::fovConeDegChanged(){
   update();
 }
 
+void RadarCanvas::fovConeRangeChanged(){
+  fovRange = ui_->fovRangeM->value()*100; 
+  update();
+}
+
 void RadarCanvas::attentionConeDegChanged(){
   attentionAmpl = ui_->attentionConeDeg->value();
+  update();
+}
+
+void RadarCanvas::attentionConeRangeChanged(){
+  attentionRange = ui_->attentionRangeM->value()*100; 
   update();
 }
 
@@ -84,27 +98,27 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   QPainter painter(this);
   painter.setPen(fovPen);
 
-  image = QImage(QSize(800, 600), QImage::Format_RGB32);
-  image.fill(qRgb(255, 255, 255));
+  painter.drawImage(QPoint(0, 0), background);
 
-  painter.drawImage(QPoint(0, 0), image);
-
-  fovRectOriginX = xOffset - detectorLength;
-  fovRectOriginY = yOffset - detectorLength;
+  fovRectOriginX = xOffset - fovRange;
+  fovRectOriginY = yOffset - fovRange;
   fovStartAngle = -(floor(fovAmpl/2)*16 + ((fovAmpl-floor(fovAmpl/2))/100*16));
   fovSpanAngle = floor(fovAmpl)*16 + ((fovAmpl-floor(fovAmpl))/100*16); 
 
-  QRectF fovRectangle(QPoint(fovRectOriginX, fovRectOriginY), QSize(detectorLength*2, detectorLength*2));
+  QRectF fovRectangle(QPoint(fovRectOriginX, fovRectOriginY), QSize(fovRange*2, fovRange*2));
   painter.drawPie(fovRectangle, fovStartAngle, fovSpanAngle);
 
   painter.setPen(attentionPen);
+  attentionRectOriginX = xOffset - attentionRange;
+  attentionRectOriginY = yOffset - attentionRange;
   attentionStartAngle = -(floor(attentionAmpl/2)*16 + ((attentionAmpl-floor(attentionAmpl/2))/100*16));
   attentionSpanAngle = floor(attentionAmpl)*16 + ((attentionAmpl-floor(attentionAmpl))/100*16);
 
-  painter.drawPie(fovRectangle, attentionStartAngle, attentionSpanAngle);
+  QRectF attentionRectangle(QPoint(attentionRectOriginX, attentionRectOriginY), QSize(attentionRange*2, attentionRange*2));
+  painter.drawPie(attentionRectangle, attentionStartAngle, attentionSpanAngle);
 
-  QRectF range1(QPoint(fovRectOriginX + detectorLength/2, fovRectOriginY + detectorLength/2), QSize(detectorLength, detectorLength));
-  QRectF range2(QPoint(fovRectOriginX + detectorLength/4, fovRectOriginY + detectorLength/4), QSize(detectorLength*3/2, detectorLength*3/2));
+  QRectF range1(QPoint(xOffset - circleRange, yOffset - circleRange), QSize(2*circleRange, 2*circleRange));
+  QRectF range2(QPoint(xOffset - (circleRange/2), yOffset - (circleRange/2)), QSize(circleRange, circleRange));
 
   painter.setPen(rangePen);
   painter.drawEllipse(range1);
@@ -114,6 +128,11 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   //painter.drawImage(QRectF(QPointF(xOffset+100, yOffset-30), QSize(70, 70)), personImage);
   painter.drawImage(QPoint(200, 265), personImage);
 
+}
+
+void RadarCanvas::resizeEvent(QResizeEvent *event){
+  background = QImage(QSize(this->size().width(), 600), QImage::Format_RGB32);
+  background.fill(qRgb(255, 255, 255)); 
 }
 
 } /* namespace */
