@@ -17,7 +17,9 @@
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include <hri/hri.h>   
+#include <hri/hri.h>
+
+#include <geometry_msgs/Vector3Stamped.h>   
 
 namespace Ui {
 class RadarCanvas;
@@ -49,6 +51,7 @@ class RadarCanvas :
 
         hri::HRIListener hriListener_;
         tf::TransformListener tfListener_;
+        geometry_msgs::Vector3Stamped versor_;
 
         // Holds the current pen width & color
         QPen fovPen, attentionPen, rangePen;

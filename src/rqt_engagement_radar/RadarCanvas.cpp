@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "rqt_engagement_radar/RadarCanvas.hpp"
 
@@ -72,6 +73,10 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   attentionPen = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
   rangePen = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 
+  versor_.vector.x = 1.0;
+  versor_.vector.y = 0.0;
+  versor_.vector.z = 0.0;
+
   update();
 }
 
@@ -103,7 +108,8 @@ void RadarCanvas::attentionConeRangeChanged(){
 
 void RadarCanvas::paintEvent(QPaintEvent *event){
   QPainter painter(this);
-  painter.setPen(fovPen);
+
+  versor_.header.stamp = ros::Time(0);
 
   painter.drawImage(QPoint(0, 0), background);
 
@@ -112,6 +118,7 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   fovStartAngle = -(floor(fovAmpl/2)*16 + ((fovAmpl-floor(fovAmpl/2))/100*16));
   fovSpanAngle = floor(fovAmpl)*16 + ((fovAmpl-floor(fovAmpl))/100*16); 
 
+  painter.setPen(fovPen);
   QRectF fovRectangle(QPoint(fovRectOriginX, fovRectOriginY), QSize(fovRange*2, fovRange*2));
   painter.drawPie(fovRectangle, fovStartAngle, fovSpanAngle);
 
@@ -127,16 +134,26 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   // Inserting people //
   auto faces = hriListener_.getFaces();
   for(auto& face: faces){
+    geometry_msgs::Vector3Stamped rotatedVersor;
+
     std::string id = face.first;
     std::string faceFrame = "face_" + id;
+    versor_.header.frame_id = faceFrame;
     tf::StampedTransform faceTrans;
+
     try{
       tfListener_.lookupTransform("camera_link", faceFrame, ros::Time(0), faceTrans);
+      tfListener_.transformVector("camera_link", versor_, rotatedVersor);
+      double theta = std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
+
+      QTransform tr;
+      tr.rotate(-(theta*180)/M_PI);
+      QImage personRotated = personImage.transformed(tr);
       
       double personRectOriginX = xOffset + (faceTrans.getOrigin().x()*100) - (personImage.size().width()/2);
       double personRectOriginY = yOffset - (faceTrans.getOrigin().y()*100) - (personImage.size().height()/2);
       
-      painter.drawImage(QPointF(personRectOriginX, personRectOriginY), personImage);
+      painter.drawImage(QPointF(personRectOriginX, personRectOriginY), personRotated);
     }
     catch(tf::TransformException ex){
       ROS_WARN("%s", ex.what());
@@ -151,10 +168,6 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   painter.drawEllipse(range2);
 
   painter.drawImage(QRectF(QPointF(xOffset-50, yOffset-50), QPointF(xOffset+50, yOffset+50)), robotImage);
-  //painter.drawImage(QRectF(QPointF(xOffset+100, yOffset-30), QSize(70, 70)), personImage);
-  //painter.drawImage(QPoint(200, 265), personImage);
-
-  //std::cout<<personImage.size().width()<<"\t"<<personImage.size().height()<<std::endl;
 }
 
 void RadarCanvas::resizeEvent(QResizeEvent *event){
