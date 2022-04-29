@@ -1,6 +1,8 @@
 #ifndef RQT_ENGAGEMENT_RADAR__RADARCANVAS_HPP
 #define RQT_ENGAGEMENT_RADAR__RADARCANVAS_HPP
 
+#include <QTimer>
+
 #include <QDockWidget>
 #include <QStringList>
 #include <QWidget>
@@ -14,6 +16,8 @@
 #include <QLine>
 
 #include <ros/ros.h>
+#include <tf/transform_listener.h>
+#include <hri/hri.h>   
 
 namespace Ui {
 class RadarCanvas;
@@ -41,7 +45,10 @@ class RadarCanvas :
     private:
         Ui::RadarCanvas *ui_;
 
-        ros::NodeHandle nh;
+        QTimer *timer_;
+
+        hri::HRIListener hriListener_;
+        tf::TransformListener tfListener_;
 
         // Holds the current pen width & color
         QPen fovPen, attentionPen, rangePen;

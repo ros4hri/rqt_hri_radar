@@ -14,12 +14,19 @@
 #include <ros/package.h>
 #include <ros/console.h>
 
+// ROS messages
+#include <hri_msgs/IdsList.h>
+
 namespace rqt_engagement_radar {
 
 RadarCanvas::RadarCanvas(QWidget *parent) :
     QWidget(parent),
     ui_(new Ui::RadarCanvas()) {
   ui_->setupUi(this);
+
+  timer_ = new QTimer(this);
+  connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::update));
+  timer_->start(100);
 
   background = QImage(QSize(this->size().width(), 600), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255));   
@@ -117,6 +124,25 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   QRectF attentionRectangle(QPoint(attentionRectOriginX, attentionRectOriginY), QSize(attentionRange*2, attentionRange*2));
   painter.drawPie(attentionRectangle, attentionStartAngle, attentionSpanAngle);
 
+  // Inserting people //
+  auto faces = hriListener_.getFaces();
+  for(auto& face: faces){
+    std::string id = face.first;
+    std::string faceFrame = "face_" + id;
+    tf::StampedTransform faceTrans;
+    try{
+      tfListener_.lookupTransform("camera_link", faceFrame, ros::Time(0), faceTrans);
+      
+      double personRectOriginX = xOffset + (faceTrans.getOrigin().x()*100) - (personImage.size().width()/2);
+      double personRectOriginY = yOffset - (faceTrans.getOrigin().y()*100) - (personImage.size().height()/2);
+      
+      painter.drawImage(QPointF(personRectOriginX, personRectOriginY), personImage);
+    }
+    catch(tf::TransformException ex){
+      ROS_WARN("%s", ex.what());
+    }
+  }
+
   QRectF range1(QPoint(xOffset - circleRange, yOffset - circleRange), QSize(2*circleRange, 2*circleRange));
   QRectF range2(QPoint(xOffset - (circleRange/2), yOffset - (circleRange/2)), QSize(circleRange, circleRange));
 
@@ -126,8 +152,9 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
   painter.drawImage(QRectF(QPointF(xOffset-50, yOffset-50), QPointF(xOffset+50, yOffset+50)), robotImage);
   //painter.drawImage(QRectF(QPointF(xOffset+100, yOffset-30), QSize(70, 70)), personImage);
-  painter.drawImage(QPoint(200, 265), personImage);
+  //painter.drawImage(QPoint(200, 265), personImage);
 
+  //std::cout<<personImage.size().width()<<"\t"<<personImage.size().height()<<std::endl;
 }
 
 void RadarCanvas::resizeEvent(QResizeEvent *event){
