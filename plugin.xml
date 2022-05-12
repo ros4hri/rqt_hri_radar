@@ -10,7 +10,7 @@
                 <statustip></statustip>
             </group>
             <label>rqt_engagement_radar</label>
-            <icon type="theme">applications-graphics</icon>
+            <icon type="theme">face-smile</icon>
             <statustip></statustip>
         </qtgui>
     </class>
