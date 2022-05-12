@@ -54,7 +54,7 @@ class RadarCanvas :
         tf::TransformListener tfListener_;
         geometry_msgs::Vector3Stamped versor_;
 
-        // Holds the current pen width & color
+        // Drawing and painting objects
         QPen fovPen, attentionPen, rangePen;
         QBrush fovBrush, attentionBrush;
 
@@ -68,6 +68,8 @@ class RadarCanvas :
         // Cones amplitude
         double fovAmpl, attentionAmpl;
 
+        int arcsToDraw;
+
         // Radar drawing components
         double detectorLength;
         double xOffset, yOffset;
@@ -77,7 +79,7 @@ class RadarCanvas :
         double attentionX, attentionY;
         double fovStartAngle, fovSpanAngle; 
         double attentionStartAngle, attentionSpanAngle;
-        double fovRange, attentionRange, circleRange;
+        double fovRange, attentionRange;
 };
 
 } /* namespace */

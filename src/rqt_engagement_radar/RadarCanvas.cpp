@@ -63,7 +63,6 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   connect(ui_->attentionConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeDegChanged);
   connect(ui_->attentionRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeRangeChanged);
 
-  circleRange = 300; 
   fovRange = 400;
   attentionRange = 300;
   xOffset = 50; // Random value
@@ -82,6 +81,8 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   versor_.vector.x = 1.0;
   versor_.vector.y = 0.0;
   versor_.vector.z = 0.0;
+
+  arcsToDraw = std::floor(this->size().width()/100);
 
   update();
 }
@@ -170,17 +171,35 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     }
   }
 
-  QRectF range1(QPoint(xOffset - circleRange, yOffset - circleRange), QSize(2*circleRange, 2*circleRange));
-  QRectF range2(QPoint(xOffset - (circleRange/2), yOffset - (circleRange/2)), QSize(circleRange, circleRange));
+  // Ranges painting process
 
   painter.setPen(rangePen);
-  painter.drawEllipse(range1);
-  painter.drawEllipse(range2);
+
+  for(int arcN = 1; arcN <= arcsToDraw; arcN++){
+    double circleRange = 100*arcN;
+    double circleRectOriginX = xOffset - circleRange;
+    double circleRectOriginY = yOffset - circleRange;
+    double circleRectWidth = 2*circleRange;
+    double circleRectHeight = 2*circleRange;
+
+    QRectF circleRect(circleRectOriginX, circleRectOriginY, circleRectWidth, circleRectHeight);
+
+    if(circleRange <= (background.size().height()/2)){
+      painter.drawEllipse(circleRect);
+    } else{
+      double theta = std::asin(background.size().height()/2/circleRange);
+      theta *= 180/M_PI; // rad to deg
+      theta *= 16; // deg to QtDeg 
+      painter.drawArc(circleRect, -theta, 2*theta);
+    }
+  }
 
   painter.drawImage(QRectF(QPointF(xOffset-50, yOffset-50), QPointF(xOffset+50, yOffset+50)), robotImage);
 }
 
 void RadarCanvas::resizeEvent(QResizeEvent *event){
+  arcsToDraw = std::floor(this->size().width()/100);
+
   background = QImage(QSize(this->size().width(), 600), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255)); 
 }
