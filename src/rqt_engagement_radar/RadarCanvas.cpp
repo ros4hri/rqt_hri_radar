@@ -69,9 +69,15 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   xOffset = 50; // Random value
   yOffset = 300; // Image length (in this case 600) / 2 ==> 300
 
-  fovPen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-  attentionPen = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+  QColor lightRed(255, 235, 235);
+  QColor lightGreen(235, 255, 235);
+
+  fovPen = QPen(lightGreen, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+  attentionPen = QPen(lightRed, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
   rangePen = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+
+  fovBrush = QBrush(lightGreen);
+  attentionBrush = QBrush(lightRed);
 
   versor_.vector.x = 1.0;
   versor_.vector.y = 0.0;
@@ -119,10 +125,12 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   fovSpanAngle = floor(fovAmpl)*16 + ((fovAmpl-floor(fovAmpl))/100*16); 
 
   painter.setPen(fovPen);
+  painter.setBrush(fovBrush);
   QRectF fovRectangle(QPoint(fovRectOriginX, fovRectOriginY), QSize(fovRange*2, fovRange*2));
   painter.drawPie(fovRectangle, fovStartAngle, fovSpanAngle);
 
   painter.setPen(attentionPen);
+  painter.setBrush(attentionBrush);
   attentionRectOriginX = xOffset - attentionRange;
   attentionRectOriginY = yOffset - attentionRange;
   attentionStartAngle = -(floor(attentionAmpl/2)*16 + ((attentionAmpl-floor(attentionAmpl/2))/100*16));
@@ -130,6 +138,8 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
   QRectF attentionRectangle(QPoint(attentionRectOriginX, attentionRectOriginY), QSize(attentionRange*2, attentionRange*2));
   painter.drawPie(attentionRectangle, attentionStartAngle, attentionSpanAngle);
+
+  painter.setBrush(QBrush(Qt::transparent));
 
   // Inserting people //
   auto faces = hriListener_.getFaces();

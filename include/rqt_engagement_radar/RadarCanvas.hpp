@@ -8,6 +8,7 @@
 #include <QWidget>
 
 #include <QPen>
+#include <QBrush>
 #include <QColor>
 
 #include <QImage>
@@ -55,6 +56,7 @@ class RadarCanvas :
 
         // Holds the current pen width & color
         QPen fovPen, attentionPen, rangePen;
+        QBrush fovBrush, attentionBrush;
 
         // Stores the image being drawn
         QImage background; // TODO: evaluating different styles rather than just fully white background
