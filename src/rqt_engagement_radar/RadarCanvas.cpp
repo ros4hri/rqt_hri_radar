@@ -115,6 +115,7 @@ void RadarCanvas::attentionConeRangeChanged(){
 
 void RadarCanvas::paintEvent(QPaintEvent *event){
   QPainter painter(this);
+  painter.setRenderHint(QPainter::Antialiasing);
 
   versor_.header.stamp = ros::Time(0);
 
