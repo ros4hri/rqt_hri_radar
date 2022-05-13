@@ -10,6 +10,7 @@
 #include <cmath>
 #include <QString>
 #include <QTransform>
+#include <QResizeEvent>
 
 // ROS Utilities
 #include <ros/package.h>
@@ -29,7 +30,7 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::update));
   timer_->start(100);
 
-  background = QImage(QSize(this->size().width(), 600), QImage::Format_RGB32);
+  background = QImage(QSize(this->size().width()-341, this->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255));   
 
   // Retrieving robot and person icons
@@ -65,8 +66,8 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
 
   fovRange = 400;
   attentionRange = 300;
-  xOffset = 50; // Random value
-  yOffset = 300; // Image length (in this case 600) / 2 ==> 300
+  xOffset = 50; 
+  yOffset = this->size().height()/2; 
 
   QColor lightRed(255, 235, 235);
   QColor lightGreen(235, 255, 235);
@@ -83,6 +84,8 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   versor_.vector.z = 0.0;
 
   arcsToDraw = std::floor(this->size().width()/100);
+
+  ui_->gridWidget->move(QPoint(this->size().width() - ui_->gridWidget->width() - 10, ui_->gridWidget->y()));
 
   update();
 }
@@ -199,9 +202,16 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 }
 
 void RadarCanvas::resizeEvent(QResizeEvent *event){
-  arcsToDraw = std::floor(this->size().width()/100);
+  yOffset = this->size().height()/2;
 
-  background = QImage(QSize(this->size().width(), 600), QImage::Format_RGB32);
+  if(event->oldSize().width() >= 0){
+    double deltaX = event->size().width() - event->oldSize().width();
+    ui_->gridWidget->move(QPoint(ui_->gridWidget->x() + deltaX, ui_->gridWidget->y()));
+  }
+
+  arcsToDraw = std::floor((this->size().width()-341)/100);
+
+  background = QImage(QSize(this->size().width()-341, this->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255)); 
 }
 

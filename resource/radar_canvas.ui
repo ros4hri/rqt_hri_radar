@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>685</width>
-    <height>812</height>
+    <width>870</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -31,28 +31,16 @@
   <property name="autoFillBackground">
    <bool>true</bool>
   </property>
-  <widget class="QWidget" name="gridLayoutWidget">
+  <widget class="QWidget" name="gridWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>600</y>
-     <width>331</width>
-     <height>181</height>
+     <x>540</x>
+     <y>10</y>
+     <width>321</width>
+     <height>180</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="fovRangeLabel">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>FoV Range (m)</string>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="1">
      <widget class="QDoubleSpinBox" name="fovConeDeg">
       <property name="accessibleName">
@@ -63,13 +51,43 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QDoubleSpinBox" name="fovRangeM">
+    <item row="4" column="0">
+     <widget class="QLabel" name="referenceFrameLabel">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Reference Frame</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QFontComboBox" name="referenceFrameBox"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="fovConeLabel">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>FoV Cone (deg)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QDoubleSpinBox" name="attentionRangeM">
+      <property name="accessibleName">
+       <string>aaaaaa</string>
+      </property>
       <property name="maximum">
        <double>10.000000000000000</double>
       </property>
       <property name="value">
-       <double>4.000000000000000</double>
+       <double>3.000000000000000</double>
       </property>
      </widget>
     </item>
@@ -95,18 +113,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="fovConeLabel">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>FoV Cone (deg)</string>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="0">
      <widget class="QLabel" name="attentionRangeLabel">
       <property name="font">
@@ -119,56 +125,98 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QDoubleSpinBox" name="attentionRangeM">
-      <property name="accessibleName">
-       <string>aaaaaa</string>
-      </property>
+    <item row="0" column="1">
+     <widget class="QDoubleSpinBox" name="fovRangeM">
       <property name="maximum">
        <double>10.000000000000000</double>
       </property>
       <property name="value">
-       <double>3.000000000000000</double>
+       <double>4.000000000000000</double>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="fovRangeLabel">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>FoV Range (m)</string>
       </property>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="verticalLayoutWidget">
+  <widget class="QWidget" name="gridLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>470</x>
-     <y>600</y>
-     <width>160</width>
-     <height>181</height>
+     <x>540</x>
+     <y>230</y>
+     <width>321</width>
+     <height>80</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QCheckBox" name="idCheckbox">
-      <property name="text">
-       <string>ID</string>
-      </property>
-     </widget>
-    </item>
-    <item>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="1" column="0">
      <widget class="QCheckBox" name="distanceCheckbox">
       <property name="text">
        <string>Distance</string>
       </property>
      </widget>
     </item>
-    <item>
+    <item row="0" column="0">
+     <widget class="QCheckBox" name="idCheckbox">
+      <property name="text">
+       <string>ID</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QCheckBox" name="speedCheckbox">
+      <property name="text">
+       <string>Gaze</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
      <widget class="QCheckBox" name="engagementCheckbox">
       <property name="text">
        <string>Engagement</string>
       </property>
      </widget>
     </item>
-    <item>
-     <widget class="QCheckBox" name="speedCheckbox">
+   </layout>
+  </widget>
+  <widget class="QWidget" name="gridLayoutWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>360</y>
+     <width>321</width>
+     <height>42</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
       <property name="text">
-       <string>Speed</string>
+       <string>ID: ---</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Distance: ---</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Engagement: ---</string>
       </property>
      </widget>
     </item>
