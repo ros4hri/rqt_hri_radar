@@ -31,7 +31,7 @@
   <property name="autoFillBackground">
    <bool>true</bool>
   </property>
-  <widget class="QWidget" name="horizontalLayoutWidget">
+  <widget class="QWidget" name="horizontalWidget" native="true">
    <property name="geometry">
     <rect>
      <x>34</x>
@@ -42,10 +42,16 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QWidget" name="radarScene" native="true"/>
+     <widget class="QWidget" name="radarCanvas" native="true"/>
     </item>
     <item>
      <widget class="QWidget" name="verticalWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QWidget" name="gridWidget" native="true">

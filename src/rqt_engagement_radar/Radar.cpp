@@ -6,6 +6,7 @@
 
 #include <QPainter>
 #include <rqt_engagement_radar/RadarCanvas.hpp>
+#include <rqt_engagement_radar/RadarScene.hpp>
 
 namespace rqt_engagement_radar {
 
@@ -22,7 +23,7 @@ Radar::~Radar() {
 }
 
 void Radar::initPlugin(qt_gui_cpp::PluginContext &context) {
-  widget_ = new RadarCanvas();
+  widget_ = new RadarScene();
   widget_->setMinimumSize(600, 420);
   context.addWidget(widget_);
 }

@@ -3,14 +3,13 @@
 
 #include "rqt_engagement_radar/RadarCanvas.hpp"
 
-#include "ui_radar_canvas.h"
-
 #include <QPainter>
 #include <QRectF>
 #include <cmath>
 #include <QString>
 #include <QTransform>
 #include <QResizeEvent>
+#include <QGraphicsView>
 
 // ROS Utilities
 #include <ros/package.h>
@@ -19,18 +18,24 @@
 // ROS messages
 #include <hri_msgs/IdsList.h>
 
+#include "ui_radar_scene.h"
+
 namespace rqt_engagement_radar {
 
-RadarCanvas::RadarCanvas(QWidget *parent) :
-    QWidget(parent),
-    ui_(new Ui::RadarCanvas()) {
-  ui_->setupUi(this);
-
+RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarScene* ui_) :
+    QWidget(parent){
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::update));
   timer_->start(100);
 
-  background = QImage(QSize(this->size().width()-341, this->size().height()), QImage::Format_RGB32);
+  this->ui_ = ui_;
+
+  connect(ui_->fovConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeDegChanged);
+  connect(ui_->fovRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeRangeChanged);
+  connect(ui_->attentionConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeDegChanged);
+  connect(ui_->attentionRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeRangeChanged);
+
+  background = QImage(QSize(this->size().width(), this->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255));   
 
   // Retrieving robot and person icons
@@ -59,11 +64,6 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
   QPainter painter(&background);
   painter.drawImage(QPoint(0, 0), background);
 
-  connect(ui_->fovConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeDegChanged);
-  connect(ui_->fovRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeRangeChanged);
-  connect(ui_->attentionConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeDegChanged);
-  connect(ui_->attentionRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeRangeChanged);
-
   fovRange = 400;
   attentionRange = 300;
   xOffset = 50; 
@@ -85,35 +85,11 @@ RadarCanvas::RadarCanvas(QWidget *parent) :
 
   arcsToDraw = std::floor(this->size().width()/100);
 
-  ui_->gridWidget->move(QPoint(this->size().width() - ui_->gridWidget->width() - 10, ui_->gridWidget->y()));
-
   update();
 }
 
 RadarCanvas::~RadarCanvas() {
   //confirmClose();
-
-  delete ui_;
-}
-
-void RadarCanvas::fovConeDegChanged(){
-  fovAmpl = ui_->fovConeDeg->value(); 
-  update();
-}
-
-void RadarCanvas::fovConeRangeChanged(){
-  fovRange = ui_->fovRangeM->value()*100; 
-  update();
-}
-
-void RadarCanvas::attentionConeDegChanged(){
-  attentionAmpl = ui_->attentionConeDeg->value();
-  update();
-}
-
-void RadarCanvas::attentionConeRangeChanged(){
-  attentionRange = ui_->attentionRangeM->value()*100; 
-  update();
 }
 
 void RadarCanvas::paintEvent(QPaintEvent *event){
@@ -204,15 +180,31 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 void RadarCanvas::resizeEvent(QResizeEvent *event){
   yOffset = this->size().height()/2;
 
-  if(event->oldSize().width() >= 0){
-    double deltaX = event->size().width() - event->oldSize().width();
-    ui_->gridWidget->move(QPoint(ui_->gridWidget->x() + deltaX, ui_->gridWidget->y()));
-  }
+  arcsToDraw = std::floor((this->size().width())/100);
 
-  arcsToDraw = std::floor((this->size().width()-341)/100);
-
-  background = QImage(QSize(this->size().width()-341, this->size().height()), QImage::Format_RGB32);
+  background = QImage(QSize(this->size().width(), this->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255)); 
+}
+
+void RadarCanvas::fovConeDegChanged(){
+  fovAmpl = ui_->fovConeDeg->value();
+   
+  update();
+}
+
+void RadarCanvas::fovConeRangeChanged(){
+  fovRange = ui_->fovRangeM->value()*100; 
+  update();
+}
+
+void RadarCanvas::attentionConeDegChanged(){
+  attentionAmpl = ui_->attentionConeDeg->value();
+  update();
+}
+
+void RadarCanvas::attentionConeRangeChanged(){
+  attentionRange = ui_->attentionRangeM->value()*100; 
+  update();
 }
 
 } /* namespace */

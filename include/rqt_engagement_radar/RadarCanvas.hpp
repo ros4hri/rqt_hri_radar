@@ -20,11 +20,11 @@
 #include <tf/transform_listener.h>
 #include <hri/hri.h>
 
-#include <geometry_msgs/Vector3Stamped.h>   
+#include <geometry_msgs/Vector3Stamped.h>
 
 namespace Ui {
-class RadarCanvas;
-};
+class RadarScene;
+};   
 
 namespace rqt_engagement_radar {
 
@@ -32,9 +32,8 @@ class RadarCanvas :
     public QWidget {
  Q_OBJECT
     public:
-        RadarCanvas(QWidget *parent = 0);
+        RadarCanvas(QWidget *parent, Ui::RadarScene* ui_);
         virtual ~RadarCanvas();
- 
     public slots:
         void fovConeDegChanged();
         void fovConeRangeChanged();
@@ -46,8 +45,6 @@ class RadarCanvas :
         void resizeEvent(QResizeEvent *event) override;
 
     private:
-        Ui::RadarCanvas *ui_;
-
         QTimer *timer_;
 
         hri::HRIListener hriListener_;
@@ -80,6 +77,10 @@ class RadarCanvas :
         double fovStartAngle, fovSpanAngle; 
         double attentionStartAngle, attentionSpanAngle;
         double fovRange, attentionRange;
+
+        // New stuff to avoid using ui
+        QWidget* widget_;
+        Ui::RadarScene* ui_;
 };
 
 } /* namespace */
