@@ -45,11 +45,10 @@ RadarScene::~RadarScene() {
 void RadarScene::resizeEvent(QResizeEvent *event){
   ui_->horizontalWidget->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
   ui_->radarCanvas->setGeometry(QRect(0, 0, event->size().width()-ui_->verticalWidget->size().width(), event->size().height()));
+}
 
-  std::cout<<"this size ==> width: "<<this->size().width()<<"\theight: "<<this->size().height()<<std::endl;
-  std::cout<<"horizontalWidget ==> width: "<<ui_->horizontalWidget->size().width()<<"\theight: "<<ui_->horizontalWidget->size().height()<<std::endl;
-  std::cout<<"verticalWidget ==> width: "<<ui_->verticalWidget->size().width()<<"\theight: "<<ui_->verticalWidget->size().height()<<std::endl;
-  std::cout<<"radarCanvas ==> width: "<<ui_->radarCanvas->size().width()<<"\theight: "<<ui_->radarCanvas->size().height()<<std::endl;
+void RadarScene::showEvent(QShowEvent *event){
+  ui_->radarCanvas->setGeometry(QRect(0, 0, this->size().width()-ui_->verticalWidget->size().width(), this->size().height()));
 }
 
 } /* namespace */

@@ -60,9 +60,6 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarScene* ui_) :
   }else{
     personImage = personImage.scaledToHeight(70);
   }
-  
-  QPainter painter(&background);
-  painter.drawImage(QPoint(0, 0), background);
 
   fovRange = 400;
   attentionRange = 300;
