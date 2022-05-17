@@ -86,7 +86,6 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarScene* ui_) :
 }
 
 RadarCanvas::~RadarCanvas() {
-  //confirmClose();
 }
 
 void RadarCanvas::paintEvent(QPaintEvent *event){

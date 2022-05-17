@@ -28,17 +28,9 @@ RadarScene::RadarScene(QWidget *parent) :
     ui_(new Ui::RadarScene()) {
   ui_->setupUi(this); 
   ui_->radarCanvas = new RadarCanvas(this, ui_);
-
-  timer_ = new QTimer(this);
-  connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarScene::update));
-  timer_->start(100);   
-
-  ui_->verticalWidget->setGeometry(QRect(0, 0, this->size().width()-ui_->radarCanvas->size().width(), this->size().height()));
 }
 
 RadarScene::~RadarScene() {
-  //confirmClose();
-
   delete ui_;
 }
 

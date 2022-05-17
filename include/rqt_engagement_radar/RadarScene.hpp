@@ -36,12 +36,6 @@ class RadarScene :
     public:
         RadarScene(QWidget *parent = 0);
         virtual ~RadarScene();
- 
-    public slots:
-        void fovConeDegChanged();
-        void fovConeRangeChanged();
-        void attentionConeDegChanged();
-        void attentionConeRangeChanged();
 
     protected:
         void resizeEvent(QResizeEvent *event) override;
@@ -49,8 +43,6 @@ class RadarScene :
 
     private:
         Ui::RadarScene *ui_;
-
-        QTimer *timer_;
 };
 
 } /* namespace */
