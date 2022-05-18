@@ -23,7 +23,7 @@
 #include <geometry_msgs/Vector3Stamped.h>
 
 namespace Ui {
-class RadarScene;
+class RadarTabs;
 };   
 
 namespace rqt_engagement_radar {
@@ -32,7 +32,7 @@ class RadarCanvas :
     public QWidget {
  Q_OBJECT
     public:
-        RadarCanvas(QWidget *parent, Ui::RadarScene* ui_);
+        RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_);
         virtual ~RadarCanvas();
     public slots:
         void fovConeDegChanged();
@@ -43,6 +43,7 @@ class RadarCanvas :
     protected:
         void paintEvent(QPaintEvent *event) override;
         void resizeEvent(QResizeEvent *event) override;
+        void showEvent(QShowEvent* event) override;
 
     private:
         QTimer *timer_;
@@ -80,7 +81,7 @@ class RadarCanvas :
 
         // New stuff to avoid using ui
         QWidget* widget_;
-        Ui::RadarScene* ui_;
+        Ui::RadarTabs* ui_;
 };
 
 } /* namespace */
