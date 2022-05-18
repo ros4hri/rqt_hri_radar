@@ -44,7 +44,7 @@ set(rqt_engagement_radar_HDRS
 # ui files #
 ############
 set(rqt_engagement_radar_UIS
-         resource/radar_scene.ui
+         resource/radar_tabs.ui
          )
 ############
 

@@ -4,7 +4,7 @@
 #include "rqt_engagement_radar/RadarScene.hpp"
 #include "rqt_engagement_radar/RadarCanvas.hpp"
 
-#include "ui_radar_scene.h"
+#include "ui_radar_tabs.h"
 
 #include <QPainter>
 #include <QRectF>
@@ -25,22 +25,34 @@ namespace rqt_engagement_radar {
 
 RadarScene::RadarScene(QWidget *parent) :
     QWidget(parent),
-    ui_(new Ui::RadarScene()) {
+    ui_(new Ui::RadarTabs()) {
   ui_->setupUi(this); 
   ui_->radarCanvas = new RadarCanvas(this, ui_);
+
+  connect(ui_->tabWidget, QOverload<int>::of(&QTabWidget::currentChanged), this, &RadarScene::showRadarCanvas);
 }
 
 RadarScene::~RadarScene() {
   delete ui_;
 }
 
+void RadarScene::showRadarCanvas(){
+  if (ui_->tabWidget->currentIndex() == 0){
+    ui_->radarCanvas->show();
+  }else{
+    ui_->radarCanvas->hide();
+  }
+}
+
 void RadarScene::resizeEvent(QResizeEvent *event){
-  ui_->horizontalWidget->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
-  ui_->radarCanvas->setGeometry(QRect(0, 0, event->size().width()-ui_->verticalWidget->size().width(), event->size().height()));
+  ui_->tabWidget->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
+  ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
 }
 
 void RadarScene::showEvent(QShowEvent *event){
-  ui_->radarCanvas->setGeometry(QRect(0, 0, this->size().width()-ui_->verticalWidget->size().width(), this->size().height()));
+  this->setGeometry((QRect(0, 0, ui_->tabWidget->size().width(), ui_->tabWidget->size().height())));
+  ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
+  ui_->tabWidget->setCurrentIndex(0);
 }
 
 } /* namespace */

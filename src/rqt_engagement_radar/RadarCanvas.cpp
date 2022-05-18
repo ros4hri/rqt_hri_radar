@@ -18,11 +18,11 @@
 // ROS messages
 #include <hri_msgs/IdsList.h>
 
-#include "ui_radar_scene.h"
+#include "ui_radar_tabs.h"
 
 namespace rqt_engagement_radar {
 
-RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarScene* ui_) :
+RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
     QWidget(parent){
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::update));
@@ -64,7 +64,7 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarScene* ui_) :
   fovRange = 400;
   attentionRange = 300;
   xOffset = 50; 
-  yOffset = this->size().height()/2; 
+  yOffset = ui_->tab->size().height()/2; 
 
   QColor lightRed(255, 235, 235);
   QColor lightGreen(235, 255, 235);
@@ -80,7 +80,7 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarScene* ui_) :
   versor_.vector.y = 0.0;
   versor_.vector.z = 0.0;
 
-  arcsToDraw = std::floor(this->size().width()/100);
+  arcsToDraw = std::floor(ui_->tab->size().width()/100);
 
   update();
 }
@@ -174,11 +174,11 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 }
 
 void RadarCanvas::resizeEvent(QResizeEvent *event){
-  yOffset = this->size().height()/2;
+  yOffset = ui_->tab->size().height()/2;
 
-  arcsToDraw = std::floor((this->size().width())/100);
+  arcsToDraw = std::floor((ui_->tab->size().width())/100);
 
-  background = QImage(QSize(this->size().width(), this->size().height()), QImage::Format_RGB32);
+  background = QImage(QSize(ui_->tab->size().width(), ui_->tab->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255)); 
 }
 
@@ -201,6 +201,10 @@ void RadarCanvas::attentionConeDegChanged(){
 void RadarCanvas::attentionConeRangeChanged(){
   attentionRange = ui_->attentionRangeM->value()*100; 
   update();
+}
+
+void RadarCanvas::showEvent(QShowEvent *event){
+  ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
 }
 
 } /* namespace */

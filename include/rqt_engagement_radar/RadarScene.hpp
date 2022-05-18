@@ -25,7 +25,7 @@
 #include "rqt_engagement_radar/RadarCanvas.hpp"
 
 namespace Ui {
-class RadarScene;
+class RadarTabs;
 };
 
 namespace rqt_engagement_radar {
@@ -36,13 +36,15 @@ class RadarScene :
     public:
         RadarScene(QWidget *parent = 0);
         virtual ~RadarScene();
+    public slots:
+        void showRadarCanvas();
 
     protected:
         void resizeEvent(QResizeEvent *event) override;
         void showEvent(QShowEvent *event) override;
 
     private:
-        Ui::RadarScene *ui_;
+        Ui::RadarTabs *ui_;
 };
 
 } /* namespace */
