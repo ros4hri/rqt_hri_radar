@@ -44,6 +44,7 @@ class RadarCanvas :
         void paintEvent(QPaintEvent *event) override;
         void resizeEvent(QResizeEvent *event) override;
         void showEvent(QShowEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* event) override;
 
     private:
         QTimer *timer_;
@@ -61,7 +62,7 @@ class RadarCanvas :
         QImage robotImage, personImage;
         bool robotImageFound, personImageFound;
         std::string package, robotImageFile, personImageFile;
-        std::map<std::string, std::vector<double>> peoplePosition;
+        std::map<std::string, QPolygon> peoplePosition;
 
         // Cones amplitude
         double fovAmpl, attentionAmpl;
@@ -82,6 +83,9 @@ class RadarCanvas :
         // New stuff to avoid using ui
         QWidget* widget_;
         Ui::RadarTabs* ui_;
+
+        // ID hovered by the mouse
+        std::string idHovered;
 };
 
 } /* namespace */
