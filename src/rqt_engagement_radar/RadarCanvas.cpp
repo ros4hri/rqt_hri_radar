@@ -5,11 +5,12 @@
 
 #include <QPainter>
 #include <QRectF>
-#include <cmath>
 #include <QString>
+#include <QVector>
 #include <QTransform>
 #include <QResizeEvent>
 #include <QGraphicsView>
+#include <QPolygon>
 
 // ROS Utilities
 #include <ros/package.h>
@@ -82,6 +83,12 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
 
   arcsToDraw = std::floor(ui_->tab->size().width()/100);
 
+  // Activating mouse events
+  this->setMouseTracking(true);
+
+  // Setting to "none" the name of the hovered person
+  idHovered = "none";
+
   update();
 }
 
@@ -120,6 +127,7 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
   // Inserting people //
   auto faces = hriListener_.getFaces();
+  peoplePosition.clear();
   for(auto& face: faces){
     geometry_msgs::Vector3Stamped rotatedVersor;
 
@@ -168,6 +176,22 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
       painter.drawImage(QPointF(0, 0), personImage);
       painter.rotate((theta*180)/M_PI);
       painter.translate(topLeftCornerAnti);
+
+      // Storing the person's containing polygon
+      // A rectangle object can not represent rotated rectangles
+
+      QVector<QPoint> points;
+      points.append(topLeftCorner.toPoint());
+      points.append(bottomLeftCorner.toPoint());
+      points.append(bottomRightCorner.toPoint());
+      points.append(topRightCorner.toPoint());
+
+      peoplePosition.insert(std::pair<std::string, QPolygon>(id, QPolygon(points)));
+
+      if(id==idHovered){
+        QString identificator = QString::fromStdString("id: "+idHovered);
+        painter.drawText(bottomRightCorner, identificator);
+      }
     }
     catch(tf::TransformException ex){
       ROS_WARN("%s", ex.what());
@@ -231,6 +255,16 @@ void RadarCanvas::attentionConeRangeChanged(){
 
 void RadarCanvas::showEvent(QShowEvent *event){
   ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
+}
+
+void RadarCanvas::mouseMoveEvent(QMouseEvent *event){
+  for(auto& elem: peoplePosition){
+    if(elem.second.containsPoint(QPoint(event->x(), event->y()), Qt::OddEvenFill)){
+      idHovered = elem.first;
+      return; // No more than one hovered person at a time
+    }
+  }
+  idHovered = "none";
 }
 
 } /* namespace */
