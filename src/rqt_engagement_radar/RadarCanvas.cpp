@@ -133,14 +133,41 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
       tfListener_.transformVector("camera_link", versor_, rotatedVersor);
       double theta = std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
 
-      QTransform tr;
-      tr.rotate(-(theta*180)/M_PI);
-      QImage personRotated = personImage.transformed(tr);
+      // Left handed rotation
+
+      double rotatedWidthX = (personImage.size().width()/2*std::cos(theta));
+      double rotatedWidthY = (personImage.size().width()/2*-std::sin(theta));
+
+      double rotatedHeightX = (personImage.size().height()/2*std::sin(theta));
+      double rotatedHeightY = (personImage.size().height()/2*std::cos(theta));
+
+      // Computing vertices of the rotated rectangle
       
-      double personRectOriginX = xOffset + (faceTrans.getOrigin().x()*100) - (personImage.size().width()/2);
-      double personRectOriginY = yOffset - (faceTrans.getOrigin().y()*100) - (personImage.size().height()/2);
-      
-      painter.drawImage(QPointF(personRectOriginX, personRectOriginY), personRotated);
+      double personRectOriginX = xOffset + (faceTrans.getOrigin().x()*100) - rotatedHeightX - rotatedWidthX;
+      double personRectOriginY = yOffset - (faceTrans.getOrigin().y()*100) - rotatedHeightY - rotatedWidthY;
+
+      double personRectRightCornerX = xOffset + (faceTrans.getOrigin().x()*100) + rotatedHeightX + rotatedWidthX;
+      double personRectRightCornerY = yOffset - (faceTrans.getOrigin().y()*100) + rotatedHeightY + rotatedWidthY;
+
+      double personRectBottomLeftX = xOffset + (faceTrans.getOrigin().x()*100) + rotatedHeightX - rotatedWidthX;
+      double personRectBottomLeftY = yOffset - (faceTrans.getOrigin().y()*100) + rotatedHeightY - rotatedWidthY;
+
+      double personRectTopRightX = xOffset + (faceTrans.getOrigin().x()*100) - rotatedHeightX + rotatedWidthX;
+      double personRectTopRightY = yOffset - (faceTrans.getOrigin().y()*100) - rotatedHeightY + rotatedWidthY;
+
+      QPointF topLeftCorner(personRectOriginX, personRectOriginY);
+      QPointF topLeftCornerAnti(-personRectOriginX, -personRectOriginY);
+      QPointF bottomRightCorner(personRectRightCornerX, personRectRightCornerY);
+      QPointF bottomLeftCorner(personRectBottomLeftX, personRectBottomLeftY);
+      QPointF topRightCorner(personRectTopRightX, personRectTopRightY);
+
+      // Image translation and rotation (via QPainter methods)
+
+      painter.translate(topLeftCorner);
+      painter.rotate(-(theta*180)/M_PI);
+      painter.drawImage(QPointF(0, 0), personImage);
+      painter.rotate((theta*180)/M_PI);
+      painter.translate(topLeftCornerAnti);
     }
     catch(tf::TransformException ex){
       ROS_WARN("%s", ex.what());
@@ -184,7 +211,6 @@ void RadarCanvas::resizeEvent(QResizeEvent *event){
 
 void RadarCanvas::fovConeDegChanged(){
   fovAmpl = ui_->fovConeDeg->value();
-   
   update();
 }
 
