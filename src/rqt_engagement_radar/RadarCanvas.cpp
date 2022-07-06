@@ -11,6 +11,8 @@
 #include <QResizeEvent>
 #include <QGraphicsView>
 #include <QPolygon>
+#include <QtSvg/QSvgWidget>
+#include <QtSvg/QSvgRenderer>
 
 // ROS Utilities
 #include <ros/package.h>
@@ -43,22 +45,24 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   package = ros::package::getPath("rqt_engagement_radar");
   robotImageFile = package + "/img/ARI_icon.png";
   personImageFile = package + "/img/Person_icon.png";
+  personSvgFile = package + "/img/adult_standing_disengaging.svg";
   robotImageFound = robotImage.load(QString::fromStdString(robotImageFile));
   personImageFound = personImage.load(QString::fromStdString(personImageFile));
 
+  svgRendererInitialized = svgRenderer.load(QString::fromStdString(personSvgFile));
+
+  // Svg rendered initialization
+
   if (!robotImageFound){
     ROS_WARN("Robot icon not found");
-  }
-  else{
-    // Rotating image
-    QTransform tr;
-    tr.rotate(-50);
-    robotImage = robotImage.transformed(tr);
   }
 
   if(!personImageFound){
     ROS_WARN("Person icon not found");
   }else{
+    QTransform tr;
+    tr.rotate(-90);
+    personImage = personImage.transformed(tr);
     personImage = personImage.scaledToHeight(70);
   }
 
@@ -204,7 +208,8 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
       painter.translate(topLeftCorner);
       painter.rotate(-(theta*180)/M_PI);
-      painter.drawImage(QPointF(0, 0), personImage);
+      //painter.drawImage(QPointF(0, 0), personImage);
+      svgRenderer.render(&painter, QRectF(QPointF(0, 0), QPointF(70, 70/1.4621)));
       painter.rotate((theta*180)/M_PI);
       painter.translate(topLeftCornerAnti);
 
