@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 if ("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
     find_package(Qt5Widgets REQUIRED)
+    find_package(Qt5Svg REQUIRED)
 else ()
     find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
     include(${QT_USE_FILE})
@@ -86,7 +87,7 @@ target_link_libraries(rqt_engagement_radar
         )
 
 if ("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
-    target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+    target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg)
 else ()
     target_link_libraries(${PROJECT_NAME} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
 endif ()

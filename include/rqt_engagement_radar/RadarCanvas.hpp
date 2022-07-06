@@ -6,6 +6,8 @@
 #include <QDockWidget>
 #include <QStringList>
 #include <QWidget>
+#include <QtSvg/QSvgWidget>
+#include <QtSvg/QSvgRenderer>
 
 #include <QPen>
 #include <QBrush>
@@ -59,11 +61,15 @@ class RadarCanvas :
         QBrush oddBrush, evenBrush;
 
         // Stores the image being drawn
-        QImage background; // TODO: evaluating different styles rather than just fully white background
+        QImage background;
         QImage robotImage, personImage;
         bool robotImageFound, personImageFound;
-        std::string package, robotImageFile, personImageFile;
+        std::string package, robotImageFile, personImageFile, personSvgFile;
         std::map<std::string, QPolygon> peoplePosition;
+
+        // Svg renderer
+        QSvgRenderer svgRenderer;
+        bool svgRendererInitialized;
 
         // Cones amplitude
         double fovAmpl, attentionAmpl;
@@ -88,6 +94,7 @@ class RadarCanvas :
 
         // ID hovered by the mouse
         std::string idHovered;
+
 };
 
 } /* namespace */
