@@ -65,10 +65,14 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   fovRange = 400;
   attentionRange = 300;
   xOffset = 50; 
-  yOffset = ui_->tab->size().height()/2; 
+  yOffset = ui_->tab->size().height()/2;
+
+  pixelPerMeter = 150; 
 
   QColor lightRed(255, 235, 235);
   QColor lightGreen(235, 255, 235);
+  QColor lightGrey(232, 232, 233);
+  QColor lighterGrey(237, 238, 239);
 
   fovPen = QPen(lightGreen, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
   attentionPen = QPen(lightRed, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
@@ -76,12 +80,17 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
 
   fovBrush = QBrush(lightGreen);
   attentionBrush = QBrush(lightRed);
+  evenBrush = QBrush(lightGrey);
+  oddBrush = QBrush(lighterGrey);
 
   versor_.vector.x = 1.0;
   versor_.vector.y = 0.0;
   versor_.vector.z = 0.0;
 
-  arcsToDraw = std::floor(ui_->tab->size().width()/100);
+  //computing the number of arcs to draw
+  
+  double distanceFromTopRightCorner = std::sqrt(std::pow((ui_->tab->size().width() - xOffset), 2) + std::pow(yOffset, 2));
+  arcsToDraw = std::ceil(distanceFromTopRightCorner/pixelPerMeter);
 
   // Activating mouse events
   this->setMouseTracking(true);
@@ -123,7 +132,29 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   QRectF attentionRectangle(QPoint(attentionRectOriginX, attentionRectOriginY), QSize(attentionRange*2, attentionRange*2));
   painter.drawPie(attentionRectangle, attentionStartAngle, attentionSpanAngle);
 
+  // Ranges painting process
+
+  painter.setPen(QPen(Qt::transparent));
+
+  for(int arcN = arcsToDraw; arcN > 0; arcN--){
+    double circleRange = pixelPerMeter*arcN;
+    double circleRectOriginX = xOffset - circleRange;
+    double circleRectOriginY = yOffset - circleRange;
+    double circleRectWidth = 2*circleRange;
+    double circleRectHeight = 2*circleRange;
+
+    QRectF circleRect(circleRectOriginX, circleRectOriginY, circleRectWidth, circleRectHeight);
+
+    if ((arcN%2) == 1)
+      painter.setBrush(oddBrush);
+    else
+      painter.setBrush(evenBrush);
+
+    painter.drawEllipse(circleRect);
+  }
+
   painter.setBrush(QBrush(Qt::transparent));
+  painter.setPen(QPen(Qt::black));
 
   // Inserting people //
   auto faces = hriListener_.getFaces();
@@ -151,17 +182,17 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
       // Computing vertices of the rotated rectangle
       
-      double personRectOriginX = xOffset + (faceTrans.getOrigin().x()*100) - rotatedHeightX - rotatedWidthX;
-      double personRectOriginY = yOffset - (faceTrans.getOrigin().y()*100) - rotatedHeightY - rotatedWidthY;
+      double personRectOriginX = xOffset + (faceTrans.getOrigin().x()*pixelPerMeter) - rotatedHeightX - rotatedWidthX;
+      double personRectOriginY = yOffset - (faceTrans.getOrigin().y()*pixelPerMeter) - rotatedHeightY - rotatedWidthY;
 
-      double personRectRightCornerX = xOffset + (faceTrans.getOrigin().x()*100) + rotatedHeightX + rotatedWidthX;
-      double personRectRightCornerY = yOffset - (faceTrans.getOrigin().y()*100) + rotatedHeightY + rotatedWidthY;
+      double personRectRightCornerX = xOffset + (faceTrans.getOrigin().x()*pixelPerMeter) + rotatedHeightX + rotatedWidthX;
+      double personRectRightCornerY = yOffset - (faceTrans.getOrigin().y()*pixelPerMeter) + rotatedHeightY + rotatedWidthY;
 
-      double personRectBottomLeftX = xOffset + (faceTrans.getOrigin().x()*100) + rotatedHeightX - rotatedWidthX;
-      double personRectBottomLeftY = yOffset - (faceTrans.getOrigin().y()*100) + rotatedHeightY - rotatedWidthY;
+      double personRectBottomLeftX = xOffset + (faceTrans.getOrigin().x()*pixelPerMeter) + rotatedHeightX - rotatedWidthX;
+      double personRectBottomLeftY = yOffset - (faceTrans.getOrigin().y()*pixelPerMeter) + rotatedHeightY - rotatedWidthY;
 
-      double personRectTopRightX = xOffset + (faceTrans.getOrigin().x()*100) - rotatedHeightX + rotatedWidthX;
-      double personRectTopRightY = yOffset - (faceTrans.getOrigin().y()*100) - rotatedHeightY + rotatedWidthY;
+      double personRectTopRightX = xOffset + (faceTrans.getOrigin().x()*pixelPerMeter) - rotatedHeightX + rotatedWidthX;
+      double personRectTopRightY = yOffset - (faceTrans.getOrigin().y()*pixelPerMeter) - rotatedHeightY + rotatedWidthY;
 
       QPointF topLeftCorner(personRectOriginX, personRectOriginY);
       QPointF topLeftCornerAnti(-personRectOriginX, -personRectOriginY);
@@ -198,36 +229,14 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     }
   }
 
-  // Ranges painting process
-
-  painter.setPen(rangePen);
-
-  for(int arcN = 1; arcN <= arcsToDraw; arcN++){
-    double circleRange = 100*arcN;
-    double circleRectOriginX = xOffset - circleRange;
-    double circleRectOriginY = yOffset - circleRange;
-    double circleRectWidth = 2*circleRange;
-    double circleRectHeight = 2*circleRange;
-
-    QRectF circleRect(circleRectOriginX, circleRectOriginY, circleRectWidth, circleRectHeight);
-
-    if(circleRange <= (background.size().height()/2)){
-      painter.drawEllipse(circleRect);
-    } else{
-      double theta = std::asin(background.size().height()/2/circleRange);
-      theta *= 180/M_PI; // rad to deg
-      theta *= 16; // deg to QtDeg 
-      painter.drawArc(circleRect, -theta, 2*theta);
-    }
-  }
-
   painter.drawImage(QRectF(QPointF(xOffset-50, yOffset-50), QPointF(xOffset+50, yOffset+50)), robotImage);
 }
 
 void RadarCanvas::resizeEvent(QResizeEvent *event){
   yOffset = ui_->tab->size().height()/2;
 
-  arcsToDraw = std::floor((ui_->tab->size().width())/100);
+  double distanceFromTopRightCorner = std::sqrt(std::pow((ui_->tab->size().width() - xOffset), 2) + std::pow(yOffset, 2));
+  arcsToDraw = std::ceil(distanceFromTopRightCorner/pixelPerMeter);
 
   background = QImage(QSize(ui_->tab->size().width(), ui_->tab->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255)); 
@@ -239,7 +248,7 @@ void RadarCanvas::fovConeDegChanged(){
 }
 
 void RadarCanvas::fovConeRangeChanged(){
-  fovRange = ui_->fovRangeM->value()*100; 
+  fovRange = ui_->fovRangeM->value()*pixelPerMeter; 
   update();
 }
 
@@ -249,7 +258,7 @@ void RadarCanvas::attentionConeDegChanged(){
 }
 
 void RadarCanvas::attentionConeRangeChanged(){
-  attentionRange = ui_->attentionRangeM->value()*100; 
+  attentionRange = ui_->attentionRangeM->value()*pixelPerMeter; 
   update();
 }
 

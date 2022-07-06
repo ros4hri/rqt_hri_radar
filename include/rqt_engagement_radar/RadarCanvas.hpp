@@ -56,6 +56,7 @@ class RadarCanvas :
         // Drawing and painting objects
         QPen fovPen, attentionPen, rangePen;
         QBrush fovBrush, attentionBrush;
+        QBrush oddBrush, evenBrush;
 
         // Stores the image being drawn
         QImage background; // TODO: evaluating different styles rather than just fully white background
@@ -66,6 +67,7 @@ class RadarCanvas :
 
         // Cones amplitude
         double fovAmpl, attentionAmpl;
+        int pixelPerMeter;
 
         int arcsToDraw;
 
