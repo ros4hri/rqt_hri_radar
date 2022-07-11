@@ -12,6 +12,7 @@
 #include <QPen>
 #include <QBrush>
 #include <QColor>
+#include <QFont>
 
 #include <QImage>
 #include <QSize>
@@ -49,6 +50,8 @@ class RadarCanvas :
         void mouseMoveEvent(QMouseEvent* event) override;
 
     private:
+        bool inScreen(double& x, double& y) const;
+
         QTimer *timer_;
 
         hri::HRIListener hriListener_;
@@ -59,6 +62,8 @@ class RadarCanvas :
         QPen fovPen, attentionPen, rangePen;
         QBrush fovBrush, attentionBrush;
         QBrush oddBrush, evenBrush;
+        QPen oddPen, evenPen;
+        QFont font, anglesFont;
 
         // Stores the image being drawn
         QImage background;
