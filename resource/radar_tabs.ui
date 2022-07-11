@@ -96,109 +96,31 @@
       <item>
        <widget class="QWidget" name="gridWidget" native="true">
         <layout class="QGridLayout" name="gridLayout">
-         <item row="2" column="1">
-          <widget class="QDoubleSpinBox" name="attentionRangeM">
-           <property name="accessibleName">
-            <string>aaaaaa</string>
+         <item row="0" column="0">
+          <widget class="QLabel" name="ppmLabel">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
            </property>
-           <property name="maximum">
-            <double>10.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>3.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QDoubleSpinBox" name="attentionConeDeg">
-           <property name="accessibleName">
-            <string>aaaaaa</string>
-           </property>
-           <property name="maximum">
-            <double>180.000000000000000</double>
+           <property name="text">
+            <string>Pixels per meter:</string>
            </property>
           </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QFontComboBox" name="referenceFrameBox"/>
          </item>
          <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="fovRangeM">
+          <widget class="QSpinBox" name="ppmSpinBox">
+           <property name="minimum">
+            <number>50</number>
+           </property>
            <property name="maximum">
-            <double>10.000000000000000</double>
+            <number>600</number>
+           </property>
+           <property name="singleStep">
+            <number>10</number>
            </property>
            <property name="value">
-            <double>4.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="referenceFrameLabel">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Reference Frame</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="attentionConeLabel">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Attention Cone (deg)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="attentionRangeLabel">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Attention Range (m)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="fovConeDeg">
-           <property name="accessibleName">
-            <string>aaaaaa</string>
-           </property>
-           <property name="maximum">
-            <double>180.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="fovConeLabel">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>FoV Cone (deg)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="fovRangeLabel">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>FoV Range (m)</string>
+            <number>300</number>
            </property>
           </widget>
          </item>
@@ -233,33 +155,6 @@
           <widget class="QCheckBox" name="idCheckbox">
            <property name="text">
             <string>ID</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="gridWidget_3" native="true">
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Engagement: ---</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>ID: ---</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Distance: ---</string>
            </property>
           </widget>
          </item>

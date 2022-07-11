@@ -38,10 +38,6 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
 
   this->ui_ = ui_;
 
-  connect(ui_->fovConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeDegChanged);
-  connect(ui_->fovRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::fovConeRangeChanged);
-  connect(ui_->attentionConeDeg, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeDegChanged);
-  connect(ui_->attentionRangeM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadarCanvas::attentionConeRangeChanged);
 
   background = QImage(QSize(this->size().width(), this->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255));   
@@ -69,8 +65,6 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
     ROS_WARN("Person icon not found");
   }
 
-  fovRange = 400;
-  attentionRange = 300;
   xOffset = 50; 
   yOffset = ui_->tab->size().height()/2;
 
@@ -82,12 +76,6 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   QColor lighterGrey(237, 238, 239);
   QColor midGrey(175, 175, 175);
 
-  fovPen = QPen(lightGreen, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-  attentionPen = QPen(lightRed, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-  //rangePen = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-
-  fovBrush = QBrush(lightGreen);
-  attentionBrush = QBrush(lightRed);
   evenBrush = QBrush(lightGrey);
   oddBrush = QBrush(lighterGrey);
   rangePen = QPen(midGrey);
@@ -125,26 +113,6 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   versor_.header.stamp = ros::Time(0);
 
   painter.drawImage(QPoint(0, 0), background);
-
-  fovRectOriginX = xOffset - fovRange;
-  fovRectOriginY = yOffset - fovRange;
-  fovStartAngle = -(floor(fovAmpl/2)*16 + ((fovAmpl-floor(fovAmpl/2))/100*16));
-  fovSpanAngle = floor(fovAmpl)*16 + ((fovAmpl-floor(fovAmpl))/100*16); 
-
-  painter.setPen(fovPen);
-  painter.setBrush(fovBrush);
-  QRectF fovRectangle(QPoint(fovRectOriginX, fovRectOriginY), QSize(fovRange*2, fovRange*2));
-  painter.drawPie(fovRectangle, fovStartAngle, fovSpanAngle);
-
-  painter.setPen(attentionPen);
-  painter.setBrush(attentionBrush);
-  attentionRectOriginX = xOffset - attentionRange;
-  attentionRectOriginY = yOffset - attentionRange;
-  attentionStartAngle = -(floor(attentionAmpl/2)*16 + ((attentionAmpl-floor(attentionAmpl/2))/100*16));
-  attentionSpanAngle = floor(attentionAmpl)*16 + ((attentionAmpl-floor(attentionAmpl))/100*16);
-
-  QRectF attentionRectangle(QPoint(attentionRectOriginX, attentionRectOriginY), QSize(attentionRange*2, attentionRange*2));
-  painter.drawPie(attentionRectangle, attentionStartAngle, attentionSpanAngle);
 
   // Ranges painting process
 
@@ -321,23 +289,6 @@ void RadarCanvas::resizeEvent(QResizeEvent *event){
   background.fill(qRgb(255, 255, 255)); 
 }
 
-void RadarCanvas::fovConeDegChanged(){
-  fovAmpl = ui_->fovConeDeg->value();
-  update();
-}
-
-void RadarCanvas::fovConeRangeChanged(){
-  fovRange = ui_->fovRangeM->value()*pixelPerMeter; 
-  update();
-}
-
-void RadarCanvas::attentionConeDegChanged(){
-  attentionAmpl = ui_->attentionConeDeg->value();
-  update();
-}
-
-void RadarCanvas::attentionConeRangeChanged(){
-  attentionRange = ui_->attentionRangeM->value()*pixelPerMeter; 
   update();
 }
 

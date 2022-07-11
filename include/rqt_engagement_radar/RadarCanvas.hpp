@@ -38,10 +38,6 @@ class RadarCanvas :
         RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_);
         virtual ~RadarCanvas();
     public slots:
-        void fovConeDegChanged();
-        void fovConeRangeChanged();
-        void attentionConeDegChanged();
-        void attentionConeRangeChanged();
 
     protected:
         void paintEvent(QPaintEvent *event) override;
@@ -59,8 +55,7 @@ class RadarCanvas :
         geometry_msgs::Vector3Stamped versor_;
 
         // Drawing and painting objects
-        QPen fovPen, attentionPen, rangePen;
-        QBrush fovBrush, attentionBrush;
+        QPen rangePen;
         QBrush oddBrush, evenBrush;
         QPen oddPen, evenPen;
         QFont font, anglesFont;
@@ -76,8 +71,6 @@ class RadarCanvas :
         QSvgRenderer svgRenderer;
         bool svgRendererInitialized;
 
-        // Cones amplitude
-        double fovAmpl, attentionAmpl;
         int pixelPerMeter;
 
         int arcsToDraw;
@@ -85,13 +78,6 @@ class RadarCanvas :
         // Radar drawing components
         double detectorLength;
         double xOffset, yOffset;
-        double fovRectOriginX, fovRectOriginY; 
-        double fovX, fovY;
-        double attentionRectOriginX, attentionRectOriginY;
-        double attentionX, attentionY;
-        double fovStartAngle, fovSpanAngle; 
-        double attentionStartAngle, attentionSpanAngle;
-        double fovRange, attentionRange;
 
         // New stuff to avoid using ui
         QWidget* widget_;
