@@ -25,6 +25,8 @@
 #include "ui_radar_tabs.h"
 
 std::vector<double> SPECIAL_ANGLES = {0, 30, 60, 90, 120, 150, 180};
+double SVG_SIZE_RATIO = 1.4857;
+double SVG_PERSON_WIDTH = 70;
 
 namespace rqt_engagement_radar {
 
@@ -47,10 +49,8 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   // Retrieving robot and person icons
   package = ros::package::getPath("rqt_engagement_radar");
   robotImageFile = package + "/img/ARI_icon.png";
-  personImageFile = package + "/img/Person_icon.png";
   personSvgFile = package + "/img/adult_standing_disengaging.svg";
   robotImageFound = robotImage.load(QString::fromStdString(robotImageFile));
-  personImageFound = personImage.load(QString::fromStdString(personImageFile)); // TODO: removing this import
 
   svgRendererInitialized = svgRenderer.load(QString::fromStdString(personSvgFile));
 
@@ -65,13 +65,8 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   // for the person and storing as a constant the 
   // h/w ratio for the svg file.
 
-  if(!personImageFound){
+  if(!svgRendererInitialized){
     ROS_WARN("Person icon not found");
-  }else{
-    QTransform tr;
-    tr.rotate(-90);
-    personImage = personImage.transformed(tr);
-    personImage = personImage.scaledToHeight(70);
   }
 
   fovRange = 400;
@@ -79,7 +74,7 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   xOffset = 50; 
   yOffset = ui_->tab->size().height()/2;
 
-  pixelPerMeter = 400; 
+  pixelPerMeter = 300; 
 
   QColor lightRed(255, 235, 235);
   QColor lightGreen(235, 255, 235);
@@ -259,13 +254,13 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
       // Half width
 
-      double rotatedWidthX = (personImage.size().width()/2*std::cos(theta));
-      double rotatedWidthY = (personImage.size().width()/2*-std::sin(theta));
+      double rotatedWidthX = (SVG_PERSON_WIDTH/2*std::cos(theta));
+      double rotatedWidthY = (SVG_PERSON_WIDTH/2*-std::sin(theta));
 
       // Half height
 
-      double rotatedHeightX = (personImage.size().height()/2*std::sin(theta));
-      double rotatedHeightY = (personImage.size().height()/2*std::cos(theta));
+      double rotatedHeightX = (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::sin(theta));
+      double rotatedHeightY = (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::cos(theta));
 
       // Computing vertices of the rotated rectangle
       
@@ -282,7 +277,6 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
       double personRectTopRightY = yOffset - (faceTrans.getOrigin().y()*pixelPerMeter) - rotatedHeightY + rotatedWidthY;
 
       QPointF topLeftCorner(personRectOriginX, personRectOriginY);
-      QPointF topLeftCornerAnti(-personRectOriginX, -personRectOriginY);
       QPointF bottomRightCorner(personRectRightCornerX, personRectRightCornerY);
       QPointF bottomLeftCorner(personRectBottomLeftX, personRectBottomLeftY);
       QPointF topRightCorner(personRectTopRightX, personRectTopRightY);
@@ -291,9 +285,9 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
       painter.translate(topLeftCorner);
       painter.rotate(-(theta*180)/M_PI);
-      svgRenderer.render(&painter, QRectF(QPointF(0, 0), QPointF(70, 70/1.4621)));
+      svgRenderer.render(&painter, QRectF(QPointF(0, 0), QPointF(SVG_PERSON_WIDTH, SVG_PERSON_WIDTH/SVG_SIZE_RATIO)));
       painter.rotate((theta*180)/M_PI);
-      painter.translate(topLeftCornerAnti);
+      painter.translate(-topLeftCorner);
 
       // Storing the person's containing polygon
       // A rectangle object can not represent rotated rectangles
@@ -306,10 +300,8 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
       peoplePosition.insert(std::pair<std::string, QPolygon>(id, QPolygon(points)));
 
-      if(id==idHovered){
-        QString identificator = QString::fromStdString("id: "+idHovered);
-        painter.drawText(bottomRightCorner, identificator);
-      }
+      QString identificator = QString::fromStdString(id);
+      painter.drawText(bottomRightCorner, identificator);
     }
     catch(tf::TransformException ex){
       ROS_WARN("%s", ex.what());
