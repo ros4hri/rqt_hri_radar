@@ -38,6 +38,7 @@ class RadarCanvas :
         RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_);
         virtual ~RadarCanvas();
     public slots:
+        void updatePixelPerMeter();
 
     protected:
         void paintEvent(QPaintEvent *event) override;
@@ -47,6 +48,7 @@ class RadarCanvas :
 
     private:
         bool inScreen(double& x, double& y) const;
+        void updateArcsToDraw();
 
         QTimer *timer_;
 
