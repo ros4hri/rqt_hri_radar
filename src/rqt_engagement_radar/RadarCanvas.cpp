@@ -38,6 +38,7 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
 
   this->ui_ = ui_;
 
+  connect(ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &RadarCanvas::updatePixelPerMeter);
 
   background = QImage(QSize(this->size().width(), this->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255));   
@@ -282,13 +283,15 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 void RadarCanvas::resizeEvent(QResizeEvent *event){
   yOffset = ui_->tab->size().height()/2;
 
-  double distanceFromTopRightCorner = std::sqrt(std::pow((ui_->tab->size().width() - xOffset), 2) + std::pow(yOffset, 2));
-  arcsToDraw = std::ceil(distanceFromTopRightCorner/pixelPerMeter);
+  updateArcsToDraw();
 
   background = QImage(QSize(ui_->tab->size().width(), ui_->tab->size().height()), QImage::Format_RGB32);
   background.fill(qRgb(255, 255, 255)); 
 }
 
+void RadarCanvas::updatePixelPerMeter(){
+  pixelPerMeter = ui_->ppmSpinBox->value();
+  updateArcsToDraw(); 
   update();
 }
 
@@ -308,6 +311,11 @@ void RadarCanvas::mouseMoveEvent(QMouseEvent *event){
 
 bool RadarCanvas::inScreen(double& x, double& y) const{
   return (x > 0) && (y > 0) && (x < this->size().width()) && (y < this->size().height());
+}
+
+void RadarCanvas::updateArcsToDraw(){
+  double distanceFromTopRightCorner = std::sqrt(std::pow((ui_->tab->size().width() - xOffset), 2) + std::pow(yOffset, 2));
+  arcsToDraw = std::ceil(distanceFromTopRightCorner/pixelPerMeter);
 }
 
 } /* namespace */
