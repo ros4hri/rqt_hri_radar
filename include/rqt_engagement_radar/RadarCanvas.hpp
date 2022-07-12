@@ -43,8 +43,7 @@ class RadarCanvas :
     protected:
         void paintEvent(QPaintEvent *event) override;
         void resizeEvent(QResizeEvent *event) override;
-        void showEvent(QShowEvent* event) override;
-        void mouseMoveEvent(QMouseEvent* event) override;
+        void mousePressEvent(QMouseEvent* event) override;
 
     private:
         bool inScreen(double& x, double& y) const;
@@ -85,8 +84,8 @@ class RadarCanvas :
         QWidget* widget_;
         Ui::RadarTabs* ui_;
 
-        // ID hovered by the mouse
-        std::string idHovered;
+        // ID clicked with mouse
+        std::string idClicked;
 
 };
 

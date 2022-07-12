@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <cmath>
 
 #include "rqt_engagement_radar/RadarCanvas.hpp"
@@ -94,7 +95,7 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   this->setMouseTracking(true);
 
   // Setting to "none" the name of the hovered person
-  idHovered = "none";
+  idClicked = "";
 
   update();
 }
@@ -216,6 +217,7 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     try{
       tfListener_.lookupTransform("camera_link", faceFrame, ros::Time(0), faceTrans);
       tfListener_.transformVector("camera_link", versor_, rotatedVersor);
+      double distance = std::sqrt(std::pow(faceTrans.getOrigin().x(), 2) + std::pow(faceTrans.getOrigin().y(), 2));
       double theta = std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
       theta += M_PI/2;
 
@@ -271,6 +273,14 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
       QString identificator = QString::fromStdString(id);
       painter.drawText(bottomRightCorner, identificator);
+      if(idClicked == id){
+        std::ostringstream distanceStream;
+        distanceStream << std::fixed << std::setprecision(2) << distance;
+        std::string distanceString = distanceStream.str();
+        QString distanceInfo = QString::fromStdString("Distance: " + distanceString);
+        painter.drawText(bottomRightCorner, identificator);
+        painter.drawText(bottomLeftCorner, distanceInfo);
+      }
     }
     catch(tf::TransformException ex){
       ROS_WARN("%s", ex.what());
@@ -295,18 +305,13 @@ void RadarCanvas::updatePixelPerMeter(){
   update();
 }
 
-void RadarCanvas::showEvent(QShowEvent *event){
-  ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
-}
-
-void RadarCanvas::mouseMoveEvent(QMouseEvent *event){
+void RadarCanvas::mousePressEvent(QMouseEvent *event){
   for(auto& elem: peoplePosition){
     if(elem.second.containsPoint(QPoint(event->x(), event->y()), Qt::OddEvenFill)){
-      idHovered = elem.first;
-      return; // No more than one hovered person at a time
+      idClicked = (idClicked != elem.first)?elem.first:"";
+      return; // No more than one clicked person at a time
     }
   }
-  idHovered = "none";
 }
 
 bool RadarCanvas::inScreen(double& x, double& y) const{
