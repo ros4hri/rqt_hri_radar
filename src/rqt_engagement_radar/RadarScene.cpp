@@ -46,12 +46,13 @@ void RadarScene::showRadarCanvas(){
 
 void RadarScene::resizeEvent(QResizeEvent *event){
   ui_->tabWidget->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
+  ui_->tab->setGeometry(QRect(0, 0, event->size().width(), event->size().height()));
   ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
 }
 
 void RadarScene::showEvent(QShowEvent *event){
-  this->setGeometry((QRect(0, 0, ui_->tabWidget->size().width(), ui_->tabWidget->size().height())));
-  ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
+  ui_->tabWidget->setGeometry(QRect(0, 0, this->size().width(), this->size().height()));
+  ui_->radarCanvas->setGeometry(QRect(0, 30, ui_->tab->size().width(), this->size().height()));
   ui_->tabWidget->setCurrentIndex(0);
 }
 

@@ -41,9 +41,6 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
 
   connect(ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &RadarCanvas::updatePixelPerMeter);
 
-  background = QImage(QSize(this->size().width(), this->size().height()), QImage::Format_RGB32);
-  background.fill(qRgb(255, 255, 255));   
-
   // Retrieving robot and person icons
   package = ros::package::getPath("rqt_engagement_radar");
   robotImageFile = package + "/img/ARI_icon.png";
@@ -52,23 +49,16 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
 
   svgRendererInitialized = svgRenderer.load(QString::fromStdString(personSvgFile));
 
-  // Svg rendered initialization
-
   if (!robotImageFound){
     ROS_WARN("Robot icon not found");
   }
-
-  // TODO: removing this import and only using
-  // the svg file. Setting as a variable the size
-  // for the person and storing as a constant the 
-  // h/w ratio for the svg file.
 
   if(!svgRendererInitialized){
     ROS_WARN("Person icon not found");
   }
 
   xOffset = 50; 
-  yOffset = ui_->tab->size().height()/2;
+  yOffset = parent->size().height()/2;
 
   pixelPerMeter = 300; 
 
@@ -113,8 +103,6 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   anglesFont = font; 
 
   versor_.header.stamp = ros::Time(0);
-
-  painter.drawImage(QPoint(0, 0), background);
 
   // Ranges painting process
 
@@ -294,9 +282,6 @@ void RadarCanvas::resizeEvent(QResizeEvent *event){
   yOffset = ui_->tab->size().height()/2;
 
   updateArcsToDraw();
-
-  background = QImage(QSize(ui_->tab->size().width(), ui_->tab->size().height()), QImage::Format_RGB32);
-  background.fill(qRgb(255, 255, 255)); 
 }
 
 void RadarCanvas::updatePixelPerMeter(){
