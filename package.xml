@@ -7,7 +7,7 @@
   <author email="lorenzo.ferrini@pal-robotics.com">Lorenzo Ferrini</author>
   <maintainer email="lorenzo.ferrini@pal-robotics.com">Lorenzo Ferrini</maintainer>
 
-  <license>BSD</license> <!-- To change -->
+  <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
