@@ -39,6 +39,7 @@ class RadarCanvas :
         virtual ~RadarCanvas();
     public slots:
         void updatePixelPerMeter();
+        void showId();
 
     protected:
         void paintEvent(QPaintEvent *event) override;
@@ -56,36 +57,35 @@ class RadarCanvas :
         geometry_msgs::Vector3Stamped versor_;
 
         // Drawing and painting objects
-        QPen rangePen;
-        QBrush oddBrush, evenBrush;
-        QPen oddPen, evenPen;
-        QFont font, anglesFont;
+        QPen rangePen_;
+        QBrush oddBrush_, evenBrush_;
+        QFont font_, anglesFont_;
 
         // Stores the image being drawn
-        QImage background;
-        QImage robotImage, personImage;
+        QImage robotImage_;
         bool robotImageFound, personImageFound;
-        std::string package, robotImageFile, personImageFile, personSvgFile;
-        std::map<std::string, QPolygon> peoplePosition;
+        std::string package_, robotImageFile_, personSvgFile_;
+        std::map<std::string, QPolygon> peoplePosition_;
 
         // Svg renderer
-        QSvgRenderer svgRenderer;
-        bool svgRendererInitialized;
+        QSvgRenderer svgRenderer_;
+        bool svgRendererInitialized_;
 
-        int pixelPerMeter;
+        int pixelPerMeter_;
 
-        int arcsToDraw;
+        int arcsToDraw_;
+
+        Qt::CheckState showIdValue_;
 
         // Radar drawing components
-        double detectorLength;
-        double xOffset, yOffset;
+        double xOffset_, yOffset_;
 
         // New stuff to avoid using ui
         QWidget* widget_;
         Ui::RadarTabs* ui_;
 
         // ID clicked with mouse
-        std::string idClicked;
+        std::string idClicked_;
 
 };
 

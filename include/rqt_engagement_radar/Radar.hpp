@@ -1,7 +1,6 @@
 #ifndef RQT_ENGAGEMENT_RADAR__RADAR_HPP
 #define RQT_ENGAGEMENT_RADAR__RADAR_HPP
 
-#include <QStringList>
 #include <rqt_gui_cpp/plugin.h>
 #include <QWidget>
 #include <unistd.h>
