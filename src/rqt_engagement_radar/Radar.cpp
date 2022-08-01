@@ -1,10 +1,7 @@
 #include "rqt_engagement_radar/Radar.hpp"
 
 #include <pluginlib/class_list_macros.h>
-#include <QGridLayout>
-#include <QStringList>
 
-#include <QPainter>
 #include <rqt_engagement_radar/RadarCanvas.hpp>
 #include <rqt_engagement_radar/RadarScene.hpp>
 

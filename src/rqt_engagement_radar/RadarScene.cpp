@@ -1,16 +1,8 @@
-#include <iostream>
-#include <cmath>
-
 #include "rqt_engagement_radar/RadarScene.hpp"
 #include "rqt_engagement_radar/RadarCanvas.hpp"
 
 #include "ui_radar_tabs.h"
 
-#include <QPainter>
-#include <QRectF>
-#include <cmath>
-#include <QString>
-#include <QTransform>
 #include <QResizeEvent>
 #include <QSizePolicy>
 
