@@ -1,3 +1,7 @@
+/**
+ * @file RadarCanvas.cpp
+ * @brief Definition of the methods declared in RadarCanvas.hpp
+ */
 #include <sstream>
 #include <cmath>
 
@@ -9,16 +13,11 @@
 #include <QVector>
 #include <QTransform>
 #include <QResizeEvent>
-#include <QGraphicsView>
 #include <QPolygon>
-#include <QtSvg/QSvgWidget>
-#include <QtSvg/QSvgRenderer>
-#include <QFont>
 #include <QCheckBox>
 
 // ROS Utilities
 #include <ros/package.h>
-#include <ros/console.h>
 
 // ROS messages
 #include <hri_msgs/IdsList.h>
@@ -58,27 +57,33 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
     ROS_WARN("Person icon not found");
   }
 
+  // xOffset is meant to be fixed, while yOffset depends
+  // on the window size
   xOffset_ = 50; 
   yOffset_ = parent->size().height()/2;
 
+  // Initial value, it is possible to modify it through settings
   pixelPerMeter_ = 300; 
 
-  QColor lightRed(255, 235, 235);
-  QColor lightGreen(235, 255, 235);
+  // Color definition
   QColor lightGrey(232, 232, 233);
   QColor lighterGrey(237, 238, 239);
   QColor midGrey(175, 175, 175);
 
+  // Brush definition. Used to paint the background
   evenBrush_ = QBrush(lightGrey);
   oddBrush_ = QBrush(lighterGrey);
   rangePen_ = QPen(midGrey);
 
+  // Initialization of a constant versor
+  // which is later used to orient person icons. 
   versor_.vector.x = 1.0;
   versor_.vector.y = 0.0;
   versor_.vector.z = 0.0;
 
-  //computing the number of arcs to draw
-  double distanceFromTopRightCorner = std::sqrt(std::pow((ui_->tab->size().width() - xOffset_), 2) + std::pow(yOffset_, 2));
+  // Computation of the number of arcs to draw
+  double distanceFromTopRightCorner = 
+    std::sqrt(std::pow((ui_->tab->size().width() - xOffset_), 2) + std::pow(yOffset_, 2));
   arcsToDraw_ = std::ceil(distanceFromTopRightCorner/pixelPerMeter_);
 
   // Activating mouse events
@@ -86,6 +91,10 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
 
   // Setting to "" the name of the hovered person
   idClicked_ = "";
+
+  // Setting the reference frame to "camera_link"
+  // To be changed in following versions
+  referenceFrame_ = "camera_link";
 
   // Reading the value representing whether we should display people ids or not
   showIdValue_ = ui_->idCheckbox->checkState();
@@ -100,38 +109,35 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
   font_ = painter.font();
-  
-  // Leaving this here for possible discussions about angles/range sizing
-  // It could be removed if we go for one single font size/style
-  anglesFont_ = font_; 
 
   versor_.header.stamp = ros::Time(0);
 
   // Ranges painting process
   painter.setPen(QPen(Qt::transparent));
 
-  font_.setPointSize(font_.pointSize());
-  anglesFont_.setPointSize(font_.pointSize());
-
   for(int arcN = arcsToDraw_; arcN > 0; arcN--){
+
+    // Setting circles and text parameters and support structures
     double circleRange = pixelPerMeter_*arcN;
     double circleRectOriginX = xOffset_ - circleRange;
     double circleRectOriginY = yOffset_ - circleRange;
     double circleRectWidth = 2*circleRange;
     double circleRectHeight = 2*circleRange;
 
-    QRectF circleRect(circleRectOriginX, circleRectOriginY, circleRectWidth, circleRectHeight);
-    QPointF textPoint(xOffset_ + circleRange + 5, yOffset_ + (font_.pointSize()/2));
-    QString rangeDescription = QString::fromStdString(std::to_string(arcN)+"m");
+    QRectF circleRect(
+      circleRectOriginX, circleRectOriginY, circleRectWidth, circleRectHeight);
+    QPointF textPoint(
+      xOffset_ + circleRange + 5, yOffset_ + (font_.pointSize()/2));
+    QString rangeDescription = 
+      QString::fromStdString(std::to_string(arcN)+"m");
 
+    // Different brush, whether it is an odd or even circle
     if ((arcN%2) == 1){
       painter.setBrush(oddBrush_);
     }
     else{
       painter.setBrush(evenBrush_);
     }
-
-    painter.setFont(font_);
 
     painter.drawEllipse(circleRect);
     painter.setPen(rangePen_);
@@ -142,9 +148,6 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     painter.translate(-textPoint);
 
     // Printing angle values
-
-    painter.setFont(anglesFont_);
-
     double distToPrint = circleRange - (0.5*pixelPerMeter_);
     for(double angle: SPECIAL_ANGLES){
       if (angle == 90)
@@ -156,7 +159,10 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
       if (inScreen(xToPrint, yToPrint)){
         painter.translate(QPointF(xToPrint, yToPrint));
         painter.rotate(angle*180/M_PI);
-        painter.drawText(QPointF(0, -2), QString::fromStdString(std::to_string(int(std::round(angle*180/M_PI))*-1)+"°")); // 2 extra pixels for readibility reasons
+        painter.drawText(
+          QPointF(0, -2), 
+          QString::fromStdString(
+            std::to_string(int(std::round(angle*180/M_PI))*-1)+"°"));
         painter.rotate(-angle*180/M_PI);
         painter.translate(-QPointF(xToPrint, yToPrint));
       }
@@ -165,26 +171,31 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     painter.setPen(QPen(Qt::transparent));
   }
 
-  // Drawing special angles
-
+  // Writing special angles values
   painter.setPen(rangePen_);
 
   for(double& angle: SPECIAL_ANGLES){
+    // Handling the process taking into account 
+    // the left handed Qt reference system
     double m = std::tan(angle/180*M_PI);
     double candidateYMaxWidth = (this->size().width() - xOffset_)/m + yOffset_;
     if(angle < 90){
-      double candidateXMaxHeight = m*(this->size().height() - yOffset_) + xOffset_;
+      double candidateXMaxHeight = 
+        m*(this->size().height() - yOffset_) + xOffset_;
       if(candidateYMaxWidth > this->size().height())
-        painter.drawLine(xOffset_, yOffset_, candidateXMaxHeight, this->size().height());
+        painter.drawLine(
+          xOffset_, yOffset_, candidateXMaxHeight, this->size().height());
       else
-        painter.drawLine(xOffset_, yOffset_, this->size().width(), candidateYMaxWidth); 
+        painter.drawLine(
+          xOffset_, yOffset_, this->size().width(), candidateYMaxWidth); 
     }
     else if(angle > 90){
-      double candidateXMaxHeight = -m*yOffset_ + xOffset_; // at this point, max height is represented by 0 on y axis
+      double candidateXMaxHeight = -m*yOffset_ + xOffset_;
       if(candidateYMaxWidth < 0)
         painter.drawLine(xOffset_, yOffset_, candidateXMaxHeight, 0);
       else
-        painter.drawLine(xOffset_, yOffset_, this->size().width(), candidateYMaxWidth); 
+        painter.drawLine(
+          xOffset_, yOffset_, this->size().width(), candidateYMaxWidth); 
     }else{
       painter.drawLine(xOffset_, yOffset_, this->size().width(), yOffset_);
     }
@@ -193,52 +204,94 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   painter.setBrush(QBrush(Qt::transparent));
   painter.setPen(QPen(Qt::black));
 
-  // Inserting people //
-  auto faces = hriListener_.getFaces();
+  // Drawing people. Using body_<body_id> frames
+  // to define people's position and orientation
+  auto bodies = hriListener_.getBodies();
   peoplePosition_.clear();
-  for(auto& face: faces){
+  for(auto& body: bodies){
     geometry_msgs::Vector3Stamped rotatedVersor;
 
-    std::string id = face.first;
-    std::string faceFrame = "face_" + id;
-    versor_.header.frame_id = faceFrame;
-    tf::StampedTransform faceTrans;
+    std::string id = body.first;
+    std::string bodyFrame = "body_" + id;
+    versor_.header.frame_id = bodyFrame;
+    tf::StampedTransform bodyTrans;
 
     try{
-      tfListener_.lookupTransform("camera_link", faceFrame, ros::Time(0), faceTrans);
-      tfListener_.transformVector("camera_link", versor_, rotatedVersor);
-      double distance = std::sqrt(std::pow(faceTrans.getOrigin().x(), 2) + std::pow(faceTrans.getOrigin().y(), 2));
-      double theta = std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
+      tfListener_.lookupTransform(
+        referenceFrame_, bodyFrame, ros::Time(0), bodyTrans);
+      tfListener_.transformVector(referenceFrame_, versor_, rotatedVersor);
+      double distance = 
+        std::sqrt(std::pow(bodyTrans.getOrigin().x(), 2) 
+          + std::pow(bodyTrans.getOrigin().y(), 2));
+      double theta = 
+        std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
       theta += M_PI/2;
 
-      // Left handed rotation
+      // Left-handed rotation of the rectangle containing the person's icon
+      // to draw
 
-      // Half width
+      // The rectangle used here is initially managed as it was
+      // centered in (0, 0) and subsequently translated. 
+      // When referencing to "width" and "height", it is actually
+      // half of the width and height of the rectangle containing
+      // the person's icon.
 
       double rotatedWidthX = (SVG_PERSON_WIDTH/2*std::cos(theta));
       double rotatedWidthY = (SVG_PERSON_WIDTH/2*-std::sin(theta));
 
-      // Half height
-
-      double rotatedHeightX = (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::sin(theta));
-      double rotatedHeightY = (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::cos(theta));
+      double rotatedHeightX = 
+        (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::sin(theta));
+      double rotatedHeightY = 
+        (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::cos(theta));
 
       // Computing vertices of the rotated rectangle
       
-      double personRectOriginX = xOffset_ + (faceTrans.getOrigin().x()*pixelPerMeter_) - rotatedHeightX - rotatedWidthX;
-      double personRectOriginY = yOffset_ - (faceTrans.getOrigin().y()*pixelPerMeter_) - rotatedHeightY - rotatedWidthY;
+      double personRectTopLeftX = 
+        xOffset_ 
+        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+        - rotatedHeightX 
+        - rotatedWidthX;
+      double personRectTopLeftY = 
+        yOffset_ 
+        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+        - rotatedHeightY 
+        - rotatedWidthY;
 
-      double personRectRightCornerX = xOffset_ + (faceTrans.getOrigin().x()*pixelPerMeter_) + rotatedHeightX + rotatedWidthX;
-      double personRectRightCornerY = yOffset_ - (faceTrans.getOrigin().y()*pixelPerMeter_) + rotatedHeightY + rotatedWidthY;
+      double personRectBottomRightX = 
+        xOffset_ 
+        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+        + rotatedHeightX 
+        + rotatedWidthX;
+      double personRectBottomRightY = 
+        yOffset_ 
+        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+        + rotatedHeightY 
+        + rotatedWidthY;
 
-      double personRectBottomLeftX = xOffset_ + (faceTrans.getOrigin().x()*pixelPerMeter_) + rotatedHeightX - rotatedWidthX;
-      double personRectBottomLeftY = yOffset_ - (faceTrans.getOrigin().y()*pixelPerMeter_) + rotatedHeightY - rotatedWidthY;
+      double personRectBottomLeftX = 
+        xOffset_ 
+        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+        + rotatedHeightX 
+        - rotatedWidthX;
+      double personRectBottomLeftY = 
+        yOffset_ 
+        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+        + rotatedHeightY 
+        - rotatedWidthY;
 
-      double personRectTopRightX = xOffset_ + (faceTrans.getOrigin().x()*pixelPerMeter_) - rotatedHeightX + rotatedWidthX;
-      double personRectTopRightY = yOffset_ - (faceTrans.getOrigin().y()*pixelPerMeter_) - rotatedHeightY + rotatedWidthY;
+      double personRectTopRightX = 
+        xOffset_ 
+        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+        - rotatedHeightX 
+        + rotatedWidthX;
+      double personRectTopRightY = 
+        yOffset_ 
+        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+        - rotatedHeightY 
+        + rotatedWidthY;
 
-      QPointF topLeftCorner(personRectOriginX, personRectOriginY);
-      QPointF bottomRightCorner(personRectRightCornerX, personRectRightCornerY);
+      QPointF topLeftCorner(personRectTopLeftX, personRectTopLeftY);
+      QPointF bottomRightCorner(personRectBottomRightX, personRectBottomRightY);
       QPointF bottomLeftCorner(personRectBottomLeftX, personRectBottomLeftY);
       QPointF topRightCorner(personRectTopRightX, personRectTopRightY);
 
@@ -246,7 +299,8 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
       painter.translate(topLeftCorner);
       painter.rotate(-(theta*180)/M_PI);
-      svgRenderer_.render(&painter, QRectF(QPointF(0, 0), QPointF(SVG_PERSON_WIDTH, SVG_PERSON_WIDTH/SVG_SIZE_RATIO)));
+      svgRenderer_.render(
+        &painter, QRectF(QPointF(0, 0), QPointF(SVG_PERSON_WIDTH, SVG_PERSON_WIDTH/SVG_SIZE_RATIO)));
       painter.rotate((theta*180)/M_PI);
       painter.translate(-topLeftCorner);
 
@@ -259,8 +313,12 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
       points.append(bottomRightCorner.toPoint());
       points.append(topRightCorner.toPoint());
 
-      peoplePosition_.insert(std::pair<std::string, QPolygon>(id, QPolygon(points)));
+      peoplePosition_.insert(
+        std::pair<std::string, QPolygon>(id, QPolygon(points)));
 
+      // Showing people ID when option selected in 
+      // radar settings
+      // Showing people distance when clicking on them
       QString identificator = QString::fromStdString(id);
       if(showIdValue_ == Qt::Checked)
         painter.drawText(bottomRightCorner, identificator);
@@ -268,7 +326,8 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
         std::ostringstream distanceStream;
         distanceStream << std::fixed << std::setprecision(2) << distance;
         std::string distanceString = distanceStream.str();
-        QString distanceInfo = QString::fromStdString("Distance: " + distanceString);
+        QString distanceInfo = 
+          QString::fromStdString("Distance: " + distanceString);
         painter.drawText(bottomRightCorner, identificator);
         painter.drawText(bottomLeftCorner, distanceInfo);
       }
@@ -278,7 +337,9 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     }
   }
 
-  painter.drawImage(QRectF(QPointF(xOffset_-50, yOffset_-50), QPointF(xOffset_+50, yOffset_+50)), robotImage_);
+  painter.drawImage(
+    QRectF(
+      QPointF(xOffset_-50, yOffset_-50), QPointF(xOffset_+50, yOffset_+50)), robotImage_);
 }
 
 void RadarCanvas::resizeEvent(QResizeEvent *event){
@@ -312,7 +373,8 @@ bool RadarCanvas::inScreen(double& x, double& y) const{
 }
 
 void RadarCanvas::updateArcsToDraw(){
-  double distanceFromTopRightCorner = std::sqrt(std::pow((ui_->tab->size().width() - xOffset_), 2) + std::pow(yOffset_, 2));
+  double distanceFromTopRightCorner = 
+    std::sqrt(std::pow((ui_->tab->size().width() - xOffset_), 2) + std::pow(yOffset_, 2));
   arcsToDraw_ = std::ceil(distanceFromTopRightCorner/pixelPerMeter_);
 }
 

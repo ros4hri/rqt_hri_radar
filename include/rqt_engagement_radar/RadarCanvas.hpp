@@ -1,3 +1,12 @@
+/**
+ * @file RadarCanvas.hpp
+ * @brief Defines the class for the RadarCanvas widget.
+ * 
+ * The widget where the radar background
+ * and icons for the rqt-humans-radar are painted
+ * taking into account the preferences expressed
+ * by the user in the settings tab.
+ */
 #ifndef RQT_ENGAGEMENT_RADAR__RADARCANVAS_HPP
 #define RQT_ENGAGEMENT_RADAR__RADARCANVAS_HPP
 
@@ -35,19 +44,60 @@ class RadarCanvas :
     public QWidget {
  Q_OBJECT
     public:
+        /** 
+         * @brief Constructor
+         */ 
         RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_);
+        /** 
+         * @brief Destructor
+         */
         virtual ~RadarCanvas();
     public slots:
+        /** 
+         * @brief Updating the pixel-per-meter value.
+         */
         void updatePixelPerMeter();
+        /** 
+         * @brief Reading the user preference about showing or not people ID.
+         * 
+         * The preference is expressed in settings,
+         * through a tick-box. Currently, person ID = <body_id>
+         */
         void showId();
 
     protected:
+        /** 
+         * @brief overriding the paintEvent virtual function. 
+         * 
+         * Inherited from QWidget. Paints the entire radar canvas.
+         */
         void paintEvent(QPaintEvent *event) override;
+        /** 
+         * @brief overriding the resizeEvent virtual function. 
+         * 
+         * Inherited from QWidget. Updates some painting parameters 
+         * according to the new size of the window.
+         */
         void resizeEvent(QResizeEvent *event) override;
+        /**
+         * @brief overriding the mousePressEvent virtual function
+         * 
+         * Inherited from QWidget. Stores the id of the person 
+         * icon the user has clicked on, if any. 
+         */
         void mousePressEvent(QMouseEvent* event) override;
 
     private:
+        /**
+         * @brief returns whether or not a point is inside the canvas.
+         */
         bool inScreen(double& x, double& y) const;
+        /**
+         * @brief updates the number of arcs to draw.
+         * 
+         * The numbers of arcs to draw is defined by the current
+         * size of the canvas. 
+         */
         void updateArcsToDraw();
 
         QTimer *timer_;
@@ -86,6 +136,9 @@ class RadarCanvas :
 
         // ID clicked with mouse
         std::string idClicked_;
+
+        // Reference frame
+        std::string referenceFrame_;
 
 };
 
