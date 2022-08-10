@@ -1,3 +1,8 @@
+/**
+ * @file RadarCanvas.hpp
+ * @brief Definition of the methods declared in RadarScene.hpp
+ */
+
 #include "rqt_engagement_radar/RadarScene.hpp"
 #include "rqt_engagement_radar/RadarCanvas.hpp"
 
