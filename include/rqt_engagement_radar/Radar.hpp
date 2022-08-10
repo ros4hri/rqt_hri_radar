@@ -1,3 +1,8 @@
+/**
+ * @file Radar.hpp
+ * @brief Defines the class for the Radar widget.
+ */
+
 #ifndef RQT_ENGAGEMENT_RADAR__RADAR_HPP
 #define RQT_ENGAGEMENT_RADAR__RADAR_HPP
 
@@ -11,22 +16,35 @@ class Radar;
 
 class Radar : public rqt_gui_cpp::Plugin {
  Q_OBJECT
- public:
-  Radar();
-  virtual ~Radar();
+    public:
+    /** 
+     * @brief Constructor
+     */
+    Radar();
+    /** 
+     *  @brief Destructor
+     */
+    virtual ~Radar();
 
-  virtual void initPlugin(qt_gui_cpp::PluginContext &context);
-  virtual void shutdownPlugin();
-  virtual void saveSettings(qt_gui_cpp::Settings &plugin_settings, qt_gui_cpp::Settings &instance_settings) const;
-  virtual void restoreSettings(const qt_gui_cpp::Settings &plugin_settings,
+    /** 
+     * @brief template function for rqt plugins
+     */  
+    virtual void initPlugin(qt_gui_cpp::PluginContext &context);
+    /** 
+     * @brief template function for rqt plugins
+     */
+    virtual void shutdownPlugin();
+    /** 
+     * @brief template function for rqt plugins
+     */
+    virtual void saveSettings(qt_gui_cpp::Settings &plugin_settings, qt_gui_cpp::Settings &instance_settings) const;
+    /** 
+     * @brief template function for rqt plugins
+     */
+    virtual void restoreSettings(const qt_gui_cpp::Settings &plugin_settings,
                                const qt_gui_cpp::Settings &instance_settings);
-
-  // Comment in to signal that the plugin has a way to configure it
-  //bool hasConfiguration() ch ficonst;
-  //void triggerConfiguration();
-
- private:
-  QWidget* widget_;
+    private:
+    QWidget* widget_;
 };
 
 } /* namespace */

@@ -1,3 +1,8 @@
+/**
+ * @file Radar.cpp
+ * @brief Definition of the methods declared in Radar.hpp
+ */
+
 #include "rqt_engagement_radar/Radar.hpp"
 
 #include <pluginlib/class_list_macros.h>
@@ -10,9 +15,6 @@ namespace rqt_engagement_radar {
 Radar::Radar()
     : rqt_gui_cpp::Plugin(),
       widget_(0){
-  // Constructor is called first before initPlugin function, needless to say.
-
-  // give QObjects reasonable names
   setObjectName("Radar");
 }
 
