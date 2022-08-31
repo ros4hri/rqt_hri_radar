@@ -1,5 +1,5 @@
-<library path="lib/librqt_engagement_radar">
-    <class type="rqt_engagement_radar::Radar" base_class_type="rqt_gui_cpp::Plugin">
+<library path="lib/librqt_human_radar">
+    <class type="rqt_human_radar::Radar" base_class_type="rqt_gui_cpp::Plugin">
         <description>
             A radar-like visualization for humans in the scene, representing their engagement level.
         </description>
@@ -9,7 +9,7 @@
                 <icon type="theme">folder</icon>
                 <statustip></statustip>
             </group>
-            <label>rqt_engagement_radar</label>
+            <label>rqt_human_radar</label>
             <icon type="theme">face-smile</icon>
             <statustip></statustip>
         </qtgui>

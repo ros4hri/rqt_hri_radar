@@ -38,7 +38,7 @@ namespace Ui {
 class RadarTabs;
 };   
 
-namespace rqt_engagement_radar {
+namespace rqt_human_radar {
 
 class RadarCanvas :
     public QWidget {

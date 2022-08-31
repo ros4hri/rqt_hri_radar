@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(rqt_engagement_radar)
+project(rqt_human_radar)
 
 # Set compiler flags
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -22,10 +22,10 @@ endif ()
 ###########
 # sources #
 ###########
-set(rqt_engagement_radar_SRCS
-        src/rqt_engagement_radar/Radar.cpp
-        src/rqt_engagement_radar/RadarScene.cpp
-        src/rqt_engagement_radar/RadarCanvas.cpp
+set(rqt_human_radar_SRCS
+        src/rqt_human_radar/Radar.cpp
+        src/rqt_human_radar/RadarScene.cpp
+        src/rqt_human_radar/RadarCanvas.cpp
         )
 ###########
 
@@ -33,10 +33,10 @@ set(rqt_engagement_radar_SRCS
 ###########
 # headers #
 ###########
-set(rqt_engagement_radar_HDRS
-        include/rqt_engagement_radar/Radar.hpp
-        include/rqt_engagement_radar/RadarScene.hpp
-        include/rqt_engagement_radar/RadarCanvas.hpp
+set(rqt_human_radar_HDRS
+        include/rqt_human_radar/Radar.hpp
+        include/rqt_human_radar/RadarScene.hpp
+        include/rqt_human_radar/RadarCanvas.hpp
         )
 ###########
 
@@ -44,12 +44,12 @@ set(rqt_engagement_radar_HDRS
 ############
 # ui files #
 ############
-set(rqt_engagement_radar_UIS
+set(rqt_human_radar_UIS
          resource/radar_tabs.ui
          )
 ############
 
-set(rqt_engagement_radar_INCLUDE_DIRECTORIES
+set(rqt_human_radar_INCLUDE_DIRECTORIES
         include
         ${CMAKE_CURRENT_BINARY_DIR}
         )
@@ -63,26 +63,26 @@ catkin_package(
 )
 
 if ("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
-    qt5_wrap_cpp(rqt_engagement_radar_MOCS ${rqt_engagement_radar_HDRS})
-    qt5_wrap_ui(rqt_engagement_radar_UIS_H ${rqt_engagement_radar_UIS})
+    qt5_wrap_cpp(rqt_human_radar_MOCS ${rqt_human_radar_HDRS})
+    qt5_wrap_ui(rqt_human_radar_UIS_H ${rqt_human_radar_UIS})
 else ()
-    qt4_wrap_cpp(rqt_engagement_radar_MOCS ${rqt_engagement_radar_HDRS})
-    qt4_wrap_ui(rqt_engagement_radar_UIS_H ${rqt_engagement_radar_UIS})
+    qt4_wrap_cpp(rqt_human_radar_MOCS ${rqt_human_radar_HDRS})
+    qt4_wrap_ui(rqt_human_radar_UIS_H ${rqt_human_radar_UIS})
 endif ()
 
 include_directories(
-        ${rqt_engagement_radar_INCLUDE_DIRECTORIES}
+        ${rqt_human_radar_INCLUDE_DIRECTORIES}
         ${catkin_INCLUDE_DIRS}
 )
 
 
-add_library(rqt_engagement_radar
-        ${rqt_engagement_radar_SRCS}
-        ${rqt_engagement_radar_MOCS}
-        ${rqt_engagement_radar_UIS_H}
+add_library(rqt_human_radar
+        ${rqt_human_radar_SRCS}
+        ${rqt_human_radar_MOCS}
+        ${rqt_human_radar_UIS_H}
         )
 
-target_link_libraries(rqt_engagement_radar
+target_link_libraries(rqt_human_radar
         ${catkin_LIBRARIES}
         )
 
@@ -94,20 +94,20 @@ endif ()
 
 
 find_package(class_loader)
-class_loader_hide_library_symbols(rqt_engagement_radar)
+class_loader_hide_library_symbols(rqt_human_radar)
 
 
 install(FILES plugin.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
 
-install(TARGETS rqt_engagement_radar
+install(TARGETS rqt_human_radar
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 
-install(PROGRAMS scripts/rqt_engagement_radar
+install(PROGRAMS scripts/rqt_human_radar
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 

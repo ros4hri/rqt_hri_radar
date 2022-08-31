@@ -5,7 +5,7 @@
 #include <sstream>
 #include <cmath>
 
-#include "rqt_engagement_radar/RadarCanvas.hpp"
+#include "rqt_human_radar/RadarCanvas.hpp"
 
 #include <QPainter>
 #include <QRectF>
@@ -28,7 +28,7 @@ std::vector<double> SPECIAL_ANGLES = {0, 30, 60, 90, 120, 150, 180};
 double SVG_SIZE_RATIO = 1.4857;
 double SVG_PERSON_WIDTH = 70;
 
-namespace rqt_engagement_radar {
+namespace rqt_human_radar {
 
 RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
     QWidget(parent){
@@ -42,7 +42,7 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
   connect(ui_->idCheckbox, QOverload<int>::of(&QCheckBox::stateChanged), this, &RadarCanvas::showId);
 
   // Retrieving robot and person icons
-  package_ = ros::package::getPath("rqt_engagement_radar");
+  package_ = ros::package::getPath("rqt_human_radar");
   robotImageFile_ = package_ + "/img/ARI_icon.png";
   personSvgFile_ = package_ + "/img/adult_standing_disengaging.svg";
   robotImageFound = robotImage_.load(QString::fromStdString(robotImageFile_));

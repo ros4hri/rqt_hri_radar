@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rqt_engagement_radar</name>
+  <name>rqt_human_radar</name>
   <version>0.0.1</version>
-  <description>A radar-like visualization for humans in the scene, representing their engagement level</description>
+  <description>A radar-like visualization for humans in the scene, representing their position, orientation, engagement level</description>
 
   <author email="lorenzo.ferrini@pal-robotics.com">Lorenzo Ferrini</author>
   <maintainer email="lorenzo.ferrini@pal-robotics.com">Lorenzo Ferrini</maintainer>

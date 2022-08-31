@@ -3,14 +3,14 @@
  * @brief Definition of the methods declared in Radar.hpp
  */
 
-#include "rqt_engagement_radar/Radar.hpp"
+#include "rqt_human_radar/Radar.hpp"
 
 #include <pluginlib/class_list_macros.h>
 
-#include <rqt_engagement_radar/RadarCanvas.hpp>
-#include <rqt_engagement_radar/RadarScene.hpp>
+#include <rqt_human_radar/RadarCanvas.hpp>
+#include <rqt_human_radar/RadarScene.hpp>
 
-namespace rqt_engagement_radar {
+namespace rqt_human_radar {
 
 Radar::Radar()
     : rqt_gui_cpp::Plugin(),
@@ -40,4 +40,4 @@ void Radar::restoreSettings(const qt_gui_cpp::Settings &plugin_settings,
 
 } /* namespace */
 
-PLUGINLIB_EXPORT_CLASS(rqt_engagement_radar::Radar, rqt_gui_cpp::Plugin)
+PLUGINLIB_EXPORT_CLASS(rqt_human_radar::Radar, rqt_gui_cpp::Plugin)

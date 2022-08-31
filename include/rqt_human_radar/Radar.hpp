@@ -10,7 +10,7 @@
 #include <QWidget>
 #include <unistd.h>
 
-namespace rqt_engagement_radar {
+namespace rqt_human_radar {
 
 class Radar;
 

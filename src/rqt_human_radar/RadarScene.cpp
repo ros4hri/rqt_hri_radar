@@ -3,8 +3,8 @@
  * @brief Definition of the methods declared in RadarScene.hpp
  */
 
-#include "rqt_engagement_radar/RadarScene.hpp"
-#include "rqt_engagement_radar/RadarCanvas.hpp"
+#include "rqt_human_radar/RadarScene.hpp"
+#include "rqt_human_radar/RadarCanvas.hpp"
 
 #include "ui_radar_tabs.h"
 
@@ -18,7 +18,7 @@
 // ROS messages
 #include <hri_msgs/IdsList.h>
 
-namespace rqt_engagement_radar {
+namespace rqt_human_radar {
 
 RadarScene::RadarScene(QWidget *parent) :
     QWidget(parent),
