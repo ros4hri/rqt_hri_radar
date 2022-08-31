@@ -8,13 +8,13 @@
 
 #include <QWidget>
 
-#include "rqt_engagement_radar/RadarCanvas.hpp"
+#include "rqt_human_radar/RadarCanvas.hpp"
 
 namespace Ui {
 class RadarTabs;
 };
 
-namespace rqt_engagement_radar {
+namespace rqt_human_radar {
 
 class RadarScene :
     public QWidget {
