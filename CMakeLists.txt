@@ -107,10 +107,6 @@ install(TARGETS rqt_human_radar
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 
-install(PROGRAMS scripts/rqt_human_radar
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        )
-
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
         )
