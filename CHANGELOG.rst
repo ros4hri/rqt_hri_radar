@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2022-10-18)
+------------------
 
 * {rqt_engagement_radar->rqt_human_radar}
 * add BSD license
