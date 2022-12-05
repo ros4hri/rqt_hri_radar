@@ -71,10 +71,13 @@ else ()
 endif ()
 
 include_directories(
-        ${rqt_human_radar_INCLUDE_DIRECTORIES}
+        SYSTEM
         ${catkin_INCLUDE_DIRS}
 )
 
+include_directories(
+        ${rqt_human_radar_INCLUDE_DIRECTORIES}
+)
 
 add_library(rqt_human_radar
         ${rqt_human_radar_SRCS}
