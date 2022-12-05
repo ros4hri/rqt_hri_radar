@@ -52,6 +52,10 @@ class RadarCanvas :
          * @brief Destructor
          */
         virtual ~RadarCanvas();
+
+        void onBody(hri::BodyWeakConstPtr body_weak);
+
+        void onBodyLost(hri::ID id);
     public slots:
         /** 
          * @brief Updating the pixel-per-meter value.
@@ -86,6 +90,8 @@ class RadarCanvas :
          * icon the user has clicked on, if any. 
          */
         void mousePressEvent(QMouseEvent* event) override;
+
+        void mouseDoubleClickEvent(QMouseEvent* event) override;
 
     private:
         /**
@@ -139,6 +145,15 @@ class RadarCanvas :
 
         // Reference frame
         std::string referenceFrame_;
+
+        // List of humans
+        std::vector<std::string> bodies_;
+
+        // POV
+        std::string pov_;
+
+        // Agents
+        std::vector<std::string> agents_;
 
 };
 

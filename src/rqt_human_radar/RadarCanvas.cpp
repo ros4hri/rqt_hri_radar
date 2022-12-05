@@ -4,6 +4,7 @@
  */
 #include <sstream>
 #include <cmath>
+#include <functional>
 
 #include "rqt_human_radar/RadarCanvas.hpp"
 
@@ -99,10 +100,24 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
   // Reading the value representing whether we should display people ids or not
   showIdValue_ = ui_->idCheckbox->checkState();
 
+  // Setting callbacks for new/removed bodies
+  hriListener_.onBody(std::bind(&RadarCanvas::onBody, this, std::placeholders::_1));
+  hriListener_.onBodyLost(std::bind(&RadarCanvas::onBodyLost, this, std::placeholders::_1));
+
   update();
 }
 
 RadarCanvas::~RadarCanvas() {
+}
+
+void RadarCanvas::onBody(hri::BodyWeakConstPtr body_weak){
+  if(auto body = body_weak.lock())
+    bodies_.push_back(body->id());
+}
+
+void RadarCanvas::onBodyLost(hri::ID id){
+  auto body = std::find(bodies_.begin(), bodies_.end(), id);
+  bodies_.erase(body);
 }
 
 void RadarCanvas::paintEvent(QPaintEvent *event){
@@ -366,6 +381,15 @@ void RadarCanvas::mousePressEvent(QMouseEvent *event){
       return; // No more than one clicked person at a time
     }
   }
+}
+
+void RadarCanvas::mouseDoubleClickEvent(QMouseEvent *event)
+{
+  /*bodies_.push_back(pov_);
+  bodies_.erase(std::find(bodies_.begin(), bodies_.end(), idClicked_));
+  pov_.clicked();*/
+  ROS_INFO_STREAM(idClicked_);
+
 }
 
 bool RadarCanvas::inScreen(double& x, double& y) const{
