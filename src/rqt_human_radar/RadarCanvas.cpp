@@ -30,13 +30,13 @@ double SVG_PERSON_WIDTH = 70;
 
 namespace rqt_human_radar {
 
-RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_) :
+RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
     QWidget(parent){
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::update));
   timer_->start(100);
 
-  this->ui_ = ui_;
+  this->ui_ = ui;
 
   connect(ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &RadarCanvas::updatePixelPerMeter);
   connect(ui_->idCheckbox, QOverload<int>::of(&QCheckBox::stateChanged), this, &RadarCanvas::showId);

@@ -47,7 +47,7 @@ class RadarCanvas :
         /** 
          * @brief Constructor
          */ 
-        RadarCanvas(QWidget *parent, Ui::RadarTabs* ui_);
+        RadarCanvas(QWidget *parent, Ui::RadarTabs* ui);
         /** 
          * @brief Destructor
          */
