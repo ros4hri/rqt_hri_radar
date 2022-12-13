@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.1 (2022-12-13)
+------------------
 * changing variable names to overcome shadowing errors
 * fixed CMakeLists.txt to overcome shadowing issues
 * adding missing build dependencies
