@@ -16,6 +16,8 @@
 #include <QResizeEvent>
 #include <QPolygon>
 #include <QCheckBox>
+#include <QStringList>
+#include <QPushButton>
 
 // ROS Utilities
 #include <ros/package.h>
@@ -37,10 +39,17 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
   connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::update));
   timer_->start(100);
 
+  /*
+  framesTimer_ = new QTimer(this);
+  connect(framesTimer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::updateFramesList));
+  framesTimer_->start(100);
+  */
+
   this->ui_ = ui;
 
   connect(ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &RadarCanvas::updatePixelPerMeter);
   connect(ui_->idCheckbox, QOverload<int>::of(&QCheckBox::stateChanged), this, &RadarCanvas::showId);
+  connect(ui_->reloadButton, &QPushButton::clicked, this, &RadarCanvas::updateFramesList);
 
   // Retrieving robot and person icons
   package_ = ros::package::getPath("rqt_human_radar");
@@ -92,10 +101,6 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
 
   // Setting to "" the name of the hovered person
   idClicked_ = "";
-
-  // Setting the reference frame to "camera_link"
-  // To be changed in following versions
-  referenceFrame_ = "camera_link";
 
   // Reading the value representing whether we should display people ids or not
   showIdValue_ = ui_->idCheckbox->checkState();
@@ -231,125 +236,135 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     versor_.header.frame_id = bodyFrame;
     tf::StampedTransform bodyTrans;
 
-    try{
-      tfListener_.lookupTransform(
-        referenceFrame_, bodyFrame, ros::Time(0), bodyTrans);
-      tfListener_.transformVector(referenceFrame_, versor_, rotatedVersor);
-      double distance = 
-        std::sqrt(std::pow(bodyTrans.getOrigin().x(), 2) 
-          + std::pow(bodyTrans.getOrigin().y(), 2));
-      double theta = 
-        std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
-      theta += M_PI/2;
+    QString currentFrameSet = ui_->refFrameComboBox->currentText();
+    if (currentFrameSet.isEmpty()){
+      referenceFrame_.reset();
+      updateFramesList();
+    }else{
+      referenceFrame_ = currentFrameSet.toStdString();
+    }
 
-      // Left-handed rotation of the rectangle containing the person's icon
-      // to draw
-
-      // The rectangle used here is initially managed as it was
-      // centered in (0, 0) and subsequently translated. 
-      // When referencing to "width" and "height", it is actually
-      // half of the width and height of the rectangle containing
-      // the person's icon.
-
-      double rotatedWidthX = (SVG_PERSON_WIDTH/2*std::cos(theta));
-      double rotatedWidthY = (SVG_PERSON_WIDTH/2*-std::sin(theta));
-
-      double rotatedHeightX = 
-        (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::sin(theta));
-      double rotatedHeightY = 
-        (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::cos(theta));
-
-      // Computing vertices of the rotated rectangle
-      
-      double personRectTopLeftX = 
-        xOffset_ 
-        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
-        - rotatedHeightX 
-        - rotatedWidthX;
-      double personRectTopLeftY = 
-        yOffset_ 
-        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
-        - rotatedHeightY 
-        - rotatedWidthY;
-
-      double personRectBottomRightX = 
-        xOffset_ 
-        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
-        + rotatedHeightX 
-        + rotatedWidthX;
-      double personRectBottomRightY = 
-        yOffset_ 
-        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
-        + rotatedHeightY 
-        + rotatedWidthY;
-
-      double personRectBottomLeftX = 
-        xOffset_ 
-        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
-        + rotatedHeightX 
-        - rotatedWidthX;
-      double personRectBottomLeftY = 
-        yOffset_ 
-        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
-        + rotatedHeightY 
-        - rotatedWidthY;
-
-      double personRectTopRightX = 
-        xOffset_ 
-        + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
-        - rotatedHeightX 
-        + rotatedWidthX;
-      double personRectTopRightY = 
-        yOffset_ 
-        - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
-        - rotatedHeightY 
-        + rotatedWidthY;
-
-      QPointF topLeftCorner(personRectTopLeftX, personRectTopLeftY);
-      QPointF bottomRightCorner(personRectBottomRightX, personRectBottomRightY);
-      QPointF bottomLeftCorner(personRectBottomLeftX, personRectBottomLeftY);
-      QPointF topRightCorner(personRectTopRightX, personRectTopRightY);
-
-      // Image translation and rotation (via QPainter methods)
-
-      painter.translate(topLeftCorner);
-      painter.rotate(-(theta*180)/M_PI);
-      svgRenderer_.render(
-        &painter, QRectF(QPointF(0, 0), QPointF(SVG_PERSON_WIDTH, SVG_PERSON_WIDTH/SVG_SIZE_RATIO)));
-      painter.rotate((theta*180)/M_PI);
-      painter.translate(-topLeftCorner);
-
-      // Storing the person's containing polygon
-      // A rectangle object can not represent rotated rectangles
-
-      QVector<QPoint> points;
-      points.append(topLeftCorner.toPoint());
-      points.append(bottomLeftCorner.toPoint());
-      points.append(bottomRightCorner.toPoint());
-      points.append(topRightCorner.toPoint());
-
-      peoplePosition_.insert(
-        std::pair<std::string, QPolygon>(id, QPolygon(points)));
-
-      // Showing people ID when option selected in 
-      // radar settings
-      // Showing people distance when clicking on them
-      QString identificator = QString::fromStdString(id);
-      if(showIdValue_ == Qt::Checked)
-        painter.drawText(bottomRightCorner, identificator);
-      if(idClicked_ == id){
-        std::ostringstream distanceStream;
-        distanceStream << std::fixed << std::setprecision(2) << distance;
-        std::string distanceString = distanceStream.str();
-        QString distanceInfo = 
-          QString::fromStdString("Distance: " + distanceString);
-        painter.drawText(bottomRightCorner, identificator);
-        painter.drawText(bottomLeftCorner, distanceInfo);
+    if (referenceFrame_){
+      try{
+          tfListener_.lookupTransform(
+            *referenceFrame_, bodyFrame, ros::Time(0), bodyTrans);
+          tfListener_.transformVector(*referenceFrame_, versor_, rotatedVersor);
+          double distance = 
+            std::sqrt(std::pow(bodyTrans.getOrigin().x(), 2) 
+              + std::pow(bodyTrans.getOrigin().y(), 2));
+          double theta = 
+            std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
+          theta += M_PI/2;
+    
+          // Left-handed rotation of the rectangle containing the person's icon
+          // to draw
+    
+          // The rectangle used here is initially managed as it was
+          // centered in (0, 0) and subsequently translated. 
+          // When referencing to "width" and "height", it is actually
+          // half of the width and height of the rectangle containing
+          // the person's icon.
+    
+          double rotatedWidthX = (SVG_PERSON_WIDTH/2*std::cos(theta));
+          double rotatedWidthY = (SVG_PERSON_WIDTH/2*-std::sin(theta));
+    
+          double rotatedHeightX = 
+            (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::sin(theta));
+          double rotatedHeightY = 
+            (SVG_PERSON_WIDTH/SVG_SIZE_RATIO/2*std::cos(theta));
+    
+          // Computing vertices of the rotated rectangle
+          
+          double personRectTopLeftX = 
+            xOffset_ 
+            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            - rotatedHeightX 
+            - rotatedWidthX;
+          double personRectTopLeftY = 
+            yOffset_ 
+            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            - rotatedHeightY 
+            - rotatedWidthY;
+    
+          double personRectBottomRightX = 
+            xOffset_ 
+            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            + rotatedHeightX 
+            + rotatedWidthX;
+          double personRectBottomRightY = 
+            yOffset_ 
+            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            + rotatedHeightY 
+            + rotatedWidthY;
+    
+          double personRectBottomLeftX = 
+            xOffset_ 
+            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            + rotatedHeightX 
+            - rotatedWidthX;
+          double personRectBottomLeftY = 
+            yOffset_ 
+            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            + rotatedHeightY 
+            - rotatedWidthY;
+    
+          double personRectTopRightX = 
+            xOffset_ 
+            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            - rotatedHeightX 
+            + rotatedWidthX;
+          double personRectTopRightY = 
+            yOffset_ 
+            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            - rotatedHeightY 
+            + rotatedWidthY;
+    
+          QPointF topLeftCorner(personRectTopLeftX, personRectTopLeftY);
+          QPointF bottomRightCorner(personRectBottomRightX, personRectBottomRightY);
+          QPointF bottomLeftCorner(personRectBottomLeftX, personRectBottomLeftY);
+          QPointF topRightCorner(personRectTopRightX, personRectTopRightY);
+    
+          // Image translation and rotation (via QPainter methods)
+    
+          painter.translate(topLeftCorner);
+          painter.rotate(-(theta*180)/M_PI);
+          svgRenderer_.render(
+            &painter, QRectF(QPointF(0, 0), QPointF(SVG_PERSON_WIDTH, SVG_PERSON_WIDTH/SVG_SIZE_RATIO)));
+          painter.rotate((theta*180)/M_PI);
+          painter.translate(-topLeftCorner);
+    
+          // Storing the person's containing polygon
+          // A rectangle object can not represent rotated rectangles
+    
+          QVector<QPoint> points;
+          points.append(topLeftCorner.toPoint());
+          points.append(bottomLeftCorner.toPoint());
+          points.append(bottomRightCorner.toPoint());
+          points.append(topRightCorner.toPoint());
+    
+          peoplePosition_.insert(
+            std::pair<std::string, QPolygon>(id, QPolygon(points)));
+    
+          // Showing people ID when option selected in 
+          // radar settings
+          // Showing people distance when clicking on them
+          QString identificator = QString::fromStdString(id);
+          if(showIdValue_ == Qt::Checked)
+            painter.drawText(bottomRightCorner, identificator);
+          if(idClicked_ == id){
+            std::ostringstream distanceStream;
+            distanceStream << std::fixed << std::setprecision(2) << distance;
+            std::string distanceString = distanceStream.str();
+            QString distanceInfo = 
+              QString::fromStdString("Distance: " + distanceString);
+            painter.drawText(bottomRightCorner, identificator);
+            painter.drawText(bottomLeftCorner, distanceInfo);
+          }
+        }
+        catch(tf::TransformException ex){
+          ROS_WARN("%s", ex.what());
+        }
       }
-    }
-    catch(tf::TransformException ex){
-      ROS_WARN("%s", ex.what());
-    }
   }
 
   painter.drawImage(
@@ -383,15 +398,6 @@ void RadarCanvas::mousePressEvent(QMouseEvent *event){
   }
 }
 
-void RadarCanvas::mouseDoubleClickEvent(QMouseEvent *event)
-{
-  /*bodies_.push_back(pov_);
-  bodies_.erase(std::find(bodies_.begin(), bodies_.end(), idClicked_));
-  pov_.clicked();*/
-  ROS_INFO_STREAM(idClicked_);
-
-}
-
 bool RadarCanvas::inScreen(double& x, double& y) const{
   return (x > 0) && (y > 0) && (x < this->size().width()) && (y < this->size().height());
 }
@@ -400,6 +406,31 @@ void RadarCanvas::updateArcsToDraw(){
   double distanceFromTopRightCorner = 
     std::sqrt(std::pow((ui_->tab->size().width() - xOffset_), 2) + std::pow(yOffset_, 2));
   arcsToDraw_ = std::ceil(distanceFromTopRightCorner/pixelPerMeter_);
+}
+
+void RadarCanvas::updateFramesList(){
+  std::vector<std::string> framesAvailable;
+  tfListener_.getFrameStrings(framesAvailable);
+  QStringList framesAvailableQ;
+  QString prevValue = ui_->refFrameComboBox->currentText();
+
+  ui_->refFrameComboBox->clear();
+  int indexPrevValue = -1;
+  int index = 0;
+
+  for (auto &frame: framesAvailable){
+    framesAvailableQ << QString::fromStdString(frame);
+    if (frame == prevValue.toStdString()){
+      indexPrevValue = index;
+    }
+    index++;
+  }
+
+  ui_->refFrameComboBox->insertItems(0, framesAvailableQ);
+
+  if (indexPrevValue != -1){
+    ui_->refFrameComboBox->setCurrentIndex(indexPrevValue);
+  }
 }
 
 } /* namespace */

@@ -34,6 +34,8 @@
 
 #include <geometry_msgs/Vector3Stamped.h>
 
+#include <boost/optional.hpp>
+
 namespace Ui {
 class RadarTabs;
 };   
@@ -56,6 +58,8 @@ class RadarCanvas :
         void onBody(hri::BodyWeakConstPtr body_weak);
 
         void onBodyLost(hri::ID id);
+
+        void updateFramesList();
     public slots:
         /** 
          * @brief Updating the pixel-per-meter value.
@@ -90,8 +94,6 @@ class RadarCanvas :
          * icon the user has clicked on, if any. 
          */
         void mousePressEvent(QMouseEvent* event) override;
-
-        void mouseDoubleClickEvent(QMouseEvent* event) override;
 
     private:
         /**
@@ -144,16 +146,10 @@ class RadarCanvas :
         std::string idClicked_;
 
         // Reference frame
-        std::string referenceFrame_;
+        boost::optional<std::string> referenceFrame_;
 
         // List of humans
         std::vector<std::string> bodies_;
-
-        // POV
-        std::string pov_;
-
-        // Agents
-        std::vector<std::string> agents_;
 
 };
 
