@@ -2,6 +2,18 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'change-perspective' into 'main'
+  reference frame selection
+  See merge request ros4hri/rqt_human_radar!2
+* defined constants as const
+* reference frame selection
+  it's now possible deciding which reference frame to use
+* adding build dependency on hri
+* [wip] defining structures for changing perspective
+* Contributors: lorenzoferrini
+
 0.2.1 (2022-12-13)
 ------------------
 * changing variable names to overcome shadowing errors
