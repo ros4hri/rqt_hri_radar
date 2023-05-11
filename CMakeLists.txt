@@ -19,6 +19,8 @@ else ()
     include(${QT_USE_FILE})
 endif ()
 
+find_package(Boost REQUIRED) # for boost::optional
+
 ###########
 # sources #
 ###########

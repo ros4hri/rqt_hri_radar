@@ -96,6 +96,31 @@
       <item>
        <widget class="QWidget" name="gridWidget" native="true">
         <layout class="QGridLayout" name="gridLayout">
+         <item row="2" column="1">
+          <widget class="QComboBox" name="refFrameComboBox">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="refFrameLabel">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Reference frame:</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="ppmLabel">
            <property name="font">
@@ -110,6 +135,9 @@
          </item>
          <item row="0" column="1">
           <widget class="QSpinBox" name="ppmSpinBox">
+           <property name="frame">
+            <bool>true</bool>
+           </property>
            <property name="minimum">
             <number>50</number>
            </property>
@@ -121,6 +149,13 @@
            </property>
            <property name="value">
             <number>300</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="reloadButton">
+           <property name="text">
+            <string>Update frames</string>
            </property>
           </widget>
          </item>

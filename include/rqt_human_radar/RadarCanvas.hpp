@@ -34,6 +34,8 @@
 
 #include <geometry_msgs/Vector3Stamped.h>
 
+#include <boost/optional.hpp>
+
 namespace Ui {
 class RadarTabs;
 };   
@@ -52,6 +54,12 @@ class RadarCanvas :
          * @brief Destructor
          */
         virtual ~RadarCanvas();
+
+        void onBody(hri::BodyWeakConstPtr body_weak);
+
+        void onBodyLost(hri::ID id);
+
+        void updateFramesList();
     public slots:
         /** 
          * @brief Updating the pixel-per-meter value.
@@ -138,7 +146,10 @@ class RadarCanvas :
         std::string idClicked_;
 
         // Reference frame
-        std::string referenceFrame_;
+        boost::optional<std::string> referenceFrame_;
+
+        // List of humans
+        std::vector<std::string> bodies_;
 
 };
 
