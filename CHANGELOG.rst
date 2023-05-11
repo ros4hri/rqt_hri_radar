@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.0 (2023-05-11)
+------------------
 * Merge branch 'change-perspective' into 'main'
   reference frame selection
   See merge request ros4hri/rqt_human_radar!2

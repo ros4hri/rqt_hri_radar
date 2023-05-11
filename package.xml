@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rqt_human_radar</name>
-  <version>0.2.1</version>
+  <version>0.3.0</version>
   <description>A radar-like visualization for humans in the scene, representing their position, orientation, engagement level</description>
 
   <author email="lorenzo.ferrini@pal-robotics.com">Lorenzo Ferrini</author>
