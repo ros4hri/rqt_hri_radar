@@ -28,8 +28,8 @@
 #include "ui_radar_tabs.h"
 
 std::vector<double> SPECIAL_ANGLES = {0, 30, 60, 90, 120, 150, 180};
-double SVG_SIZE_RATIO = 1.4857;
-double SVG_PERSON_WIDTH = 70;
+const double SVG_SIZE_RATIO = 1.4857;
+const double SVG_PERSON_WIDTH = 70;
 
 namespace rqt_human_radar {
 
