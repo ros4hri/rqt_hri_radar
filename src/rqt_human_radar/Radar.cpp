@@ -5,7 +5,7 @@
 
 #include "rqt_human_radar/Radar.hpp"
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <rqt_human_radar/RadarCanvas.hpp>
 #include <rqt_human_radar/RadarScene.hpp>
@@ -15,14 +15,14 @@ namespace rqt_human_radar {
 Radar::Radar()
     : rqt_gui_cpp::Plugin(),
       widget_(0){
-  setObjectName("Radar");
+  setObjectName("Human Radar");
 }
 
 Radar::~Radar() {
 }
 
 void Radar::initPlugin(qt_gui_cpp::PluginContext &context) {
-  widget_ = new RadarScene();
+  widget_ = new RadarScene(0, node_);
   widget_->setMinimumSize(600, 420);
   context.addWidget(widget_);
 }

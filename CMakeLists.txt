@@ -1,25 +1,18 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.14)
+
 project(rqt_human_radar)
 
-# Set compiler flags
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+# Dependencies
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Svg REQUIRED)
 
-find_package(catkin REQUIRED COMPONENTS
-        rqt_gui
-        rqt_gui_cpp
-        hri
-        tf
-        )
-
-if ("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
-    find_package(Qt5Widgets REQUIRED)
-    find_package(Qt5Svg REQUIRED)
-else ()
-    find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-    include(${QT_USE_FILE})
-endif ()
-
-find_package(Boost REQUIRED) # for boost::optional
+if(WIN32)
+  message(STATUS "rqt_human_radar is not yet supported on Windows. Package will not be built.")
+  ament_package()
+  return()
+endif()
 
 ###########
 # sources #
@@ -51,67 +44,34 @@ set(rqt_human_radar_UIS
          )
 ############
 
-set(rqt_human_radar_INCLUDE_DIRECTORIES
-        include
-        ${CMAKE_CURRENT_BINARY_DIR}
-        )
+qt5_wrap_cpp(rqt_human_radar_MOCS ${rqt_human_radar_HDRS})
 
-catkin_package(
-        LIBRARIES ${PROJECT_NAME}
-        CATKIN_DEPENDS
-        rqt_gui
-        rqt_gui_cpp
-        DEPENDS
-)
+qt5_wrap_ui(rqt_human_radar_UIS_H ${rqt_human_radar_UIS})
 
-if ("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
-    qt5_wrap_cpp(rqt_human_radar_MOCS ${rqt_human_radar_HDRS})
-    qt5_wrap_ui(rqt_human_radar_UIS_H ${rqt_human_radar_UIS})
-else ()
-    qt4_wrap_cpp(rqt_human_radar_MOCS ${rqt_human_radar_HDRS})
-    qt4_wrap_ui(rqt_human_radar_UIS_H ${rqt_human_radar_UIS})
-endif ()
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-include_directories(
-        SYSTEM
-        ${catkin_INCLUDE_DIRS}
-)
-
-include_directories(
-        ${rqt_human_radar_INCLUDE_DIRECTORIES}
-)
-
-add_library(rqt_human_radar
+ament_auto_add_library(${PROJECT_NAME} SHARED
         ${rqt_human_radar_SRCS}
         ${rqt_human_radar_MOCS}
         ${rqt_human_radar_UIS_H}
         )
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg)
 
-target_link_libraries(rqt_human_radar
-        ${catkin_LIBRARIES}
-        )
-
-if ("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
-    target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg)
-else ()
-    target_link_libraries(${PROJECT_NAME} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
-endif ()
+ament_export_libraries(${PROJECT_NAME})
 
 
 find_package(class_loader)
 class_loader_hide_library_symbols(rqt_human_radar)
 
-
+# Additional installs
 install(FILES plugin.xml
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-        )
+  DESTINATION share/${PROJECT_NAME}
+)
+install(DIRECTORY res
+  DESTINATION share/${PROJECT_NAME}
+)
 
-install(TARGETS rqt_human_radar
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        )
+pluginlib_export_plugin_description_file(rqt_gui "plugin.xml")
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-        )
+ament_auto_package()

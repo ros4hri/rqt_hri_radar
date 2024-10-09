@@ -1,17 +1,17 @@
-<library path="lib/librqt_human_radar">
-    <class type="rqt_human_radar::Radar" base_class_type="rqt_gui_cpp::Plugin">
-        <description>
-            A radar-like visualization for humans in the scene, representing their engagement level.
-        </description>
-        <qtgui>
-            <group>
-                <label>ROS4HRI</label>
-                <icon type="theme">folder</icon>
-                <statustip></statustip>
-            </group>
-            <label>rqt_human_radar</label>
-            <icon type="theme">face-smile</icon>
-            <statustip></statustip>
-        </qtgui>
-    </class>
+<library path="rqt_human_radar">
+  <class name="rqt_human_radar/HumanRadar" type="rqt_human_radar::Radar" base_class_type="rqt_gui_cpp::Plugin">
+    <description>
+      A radar-like visualization for humans in the scene, representing their engagement level.
+    </description>
+    <qtgui>
+      <group>
+        <label>Human-Robot Interaction</label>
+        <icon type="theme">folder</icon>
+        <statustip></statustip>
+      </group>
+      <label>Human radar</label>
+      <icon type="theme">face-smile</icon>
+      <statustip>A ROS4HRI-compatible top-down radar view of the people in the robot's vicinity.</statustip>
+    </qtgui>
+  </class>
 </library>

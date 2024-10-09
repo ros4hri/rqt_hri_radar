@@ -8,6 +8,8 @@
 
 #include <QWidget>
 
+#include <rclcpp/rclcpp.hpp>
+
 #include "rqt_human_radar/RadarCanvas.hpp"
 
 namespace Ui {
@@ -23,7 +25,7 @@ class RadarScene :
         /**
          * @brief Constructor
          */
-        RadarScene(QWidget *parent = 0);
+        RadarScene(QWidget *parent = 0, rclcpp::Node::SharedPtr node=nullptr);
         /**
          * @brief Destructor
          */
@@ -49,6 +51,9 @@ class RadarScene :
 
     private:
         Ui::RadarTabs *ui_;
+        
+        // ROS 2 node
+        rclcpp::Node::SharedPtr node_;
 };
 
 } /* namespace */

@@ -28,13 +28,15 @@
 
 #include <QLine>
 
-#include <ros/ros.h>
-#include <tf/transform_listener.h>
-#include <hri/hri.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <hri/hri.hpp>
 
-#include <geometry_msgs/Vector3Stamped.h>
+#include <rclcpp/rclcpp.hpp>
 
-#include <boost/optional.hpp>
+#include <geometry_msgs/msg/vector3_stamped.hpp>
+
 
 namespace Ui {
 class RadarTabs;
@@ -49,13 +51,14 @@ class RadarCanvas :
         /** 
          * @brief Constructor
          */ 
-        RadarCanvas(QWidget *parent, Ui::RadarTabs* ui);
+        RadarCanvas(QWidget *parent, Ui::RadarTabs* ui, rclcpp::Node::SharedPtr node);
+
         /** 
          * @brief Destructor
          */
         virtual ~RadarCanvas();
 
-        void onBody(hri::BodyWeakConstPtr body_weak);
+        void onBody(hri::ConstBodyPtr body);
 
         void onBodyLost(hri::ID id);
 
@@ -110,9 +113,11 @@ class RadarCanvas :
 
         QTimer *timer_;
 
-        hri::HRIListener hriListener_;
-        tf::TransformListener tfListener_;
-        geometry_msgs::Vector3Stamped versor_;
+        rclcpp::Node::SharedPtr node_;
+        std::shared_ptr<hri::HRIListener> hriListener_;
+        std::shared_ptr<tf2_ros::TransformListener> tfListener_;
+        std::shared_ptr<tf2_ros::Buffer> tfBuffer_;
+        geometry_msgs::msg::Vector3Stamped versor_;
 
         // Drawing and painting objects
         QPen rangePen_;
@@ -146,7 +151,7 @@ class RadarCanvas :
         std::string idClicked_;
 
         // Reference frame
-        boost::optional<std::string> referenceFrame_;
+        std::optional<std::string> referenceFrame_;
 
         // List of humans
         std::vector<std::string> bodies_;

@@ -19,11 +19,13 @@
 #include <QStringList>
 #include <QPushButton>
 
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>  // For transforming geometry_msgs types
+
 // ROS Utilities
-#include <ros/package.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 // ROS messages
-#include <hri_msgs/IdsList.h>
+#include <hri_msgs/msg/ids_list.hpp>
 
 #include "ui_radar_tabs.h"
 
@@ -33,8 +35,15 @@ const double SVG_PERSON_WIDTH = 70;
 
 namespace rqt_human_radar {
 
-RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
-    QWidget(parent){
+RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui, rclcpp::Node::SharedPtr node) :    QWidget(parent),
+    node_(node)
+    {
+
+    hriListener_ = hri::HRIListener::create(node_);
+
+    tfBuffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
+    tfListener_ = std::make_shared<tf2_ros::TransformListener>(*tfBuffer_);
+
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, QOverload<>::of(&RadarCanvas::update));
   timer_->start(100);
@@ -52,19 +61,25 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
   connect(ui_->reloadButton, &QPushButton::clicked, this, &RadarCanvas::updateFramesList);
 
   // Retrieving robot and person icons
-  package_ = ros::package::getPath("rqt_human_radar");
-  robotImageFile_ = package_ + "/img/ARI_icon.png";
-  personSvgFile_ = package_ + "/img/adult_standing_disengaging.svg";
+  try {
+    package_ = ament_index_cpp::get_package_share_directory("rqt_human_radar");
+    robotImageFile_ = package_ + "/res/ARI_icon.png";
+    personSvgFile_ = package_ + "/res/adult_standing_disengaging.svg";
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(node_->get_logger(), "Could not find package path for 'rqt_human_radar': %s", e.what());
+    exit(1);
+  }
+
   robotImageFound = robotImage_.load(QString::fromStdString(robotImageFile_));
 
   svgRendererInitialized_ = svgRenderer_.load(QString::fromStdString(personSvgFile_));
 
   if (!robotImageFound){
-    ROS_WARN("Robot icon not found");
+    RCLCPP_WARN(node_->get_logger(), "Robot icon not found");
   }
 
   if(!svgRendererInitialized_){
-    ROS_WARN("Person icon not found");
+    RCLCPP_WARN(node_->get_logger(), "Person icon not found");
   }
 
   // xOffset is meant to be fixed, while yOffset depends
@@ -106,8 +121,8 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
   showIdValue_ = ui_->idCheckbox->checkState();
 
   // Setting callbacks for new/removed bodies
-  hriListener_.onBody(std::bind(&RadarCanvas::onBody, this, std::placeholders::_1));
-  hriListener_.onBodyLost(std::bind(&RadarCanvas::onBodyLost, this, std::placeholders::_1));
+  hriListener_->onBody(std::bind(&RadarCanvas::onBody, this, std::placeholders::_1));
+  hriListener_->onBodyLost(std::bind(&RadarCanvas::onBodyLost, this, std::placeholders::_1));
 
   update();
 }
@@ -115,8 +130,7 @@ RadarCanvas::RadarCanvas(QWidget *parent, Ui::RadarTabs* ui) :
 RadarCanvas::~RadarCanvas() {
 }
 
-void RadarCanvas::onBody(hri::BodyWeakConstPtr body_weak){
-  if(auto body = body_weak.lock())
+void RadarCanvas::onBody(hri::ConstBodyPtr body){
     bodies_.push_back(body->id());
 }
 
@@ -130,7 +144,7 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
   painter.setRenderHint(QPainter::Antialiasing);
   font_ = painter.font();
 
-  versor_.header.stamp = ros::Time(0);
+  versor_.header.stamp = rclcpp::Time();
 
   // Ranges painting process
   painter.setPen(QPen(Qt::transparent));
@@ -170,7 +184,7 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
     // Printing angle values
     double distToPrint = circleRange - (0.5*pixelPerMeter_);
     for(double angle: SPECIAL_ANGLES){
-      if (angle == 90)
+      if (abs(angle - 90) < 1e-4)
         continue;
       angle -= 90;
       angle *= (M_PI/180);
@@ -226,15 +240,15 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
   // Drawing people. Using body_<body_id> frames
   // to define people's position and orientation
-  auto bodies = hriListener_.getBodies();
+  auto bodies = hriListener_->getBodies();
   peoplePosition_.clear();
   for(auto& body: bodies){
-    geometry_msgs::Vector3Stamped rotatedVersor;
+    geometry_msgs::msg::Vector3Stamped rotatedVersor;
 
     std::string id = body.first;
     std::string bodyFrame = "body_" + id;
     versor_.header.frame_id = bodyFrame;
-    tf::StampedTransform bodyTrans;
+    geometry_msgs::msg::TransformStamped bodyTrans;
 
     QString currentFrameSet = ui_->refFrameComboBox->currentText();
     if (currentFrameSet.isEmpty()){
@@ -246,12 +260,13 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
 
     if (referenceFrame_){
       try{
-          tfListener_.lookupTransform(
-            *referenceFrame_, bodyFrame, ros::Time(0), bodyTrans);
-          tfListener_.transformVector(*referenceFrame_, versor_, rotatedVersor);
+          bodyTrans = tfBuffer_->lookupTransform(
+            *referenceFrame_, bodyFrame, rclcpp::Time(0), rclcpp::Duration(1, 0));  // 1-second timeout;
+          tf2::doTransform(versor_, rotatedVersor, bodyTrans);
+
           double distance = 
-            std::sqrt(std::pow(bodyTrans.getOrigin().x(), 2) 
-              + std::pow(bodyTrans.getOrigin().y(), 2));
+            std::sqrt(std::pow(bodyTrans.transform.translation.x, 2) 
+              + std::pow(bodyTrans.transform.translation.y, 2));
           double theta = 
             std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
           theta += M_PI/2;
@@ -277,45 +292,45 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
           
           double personRectTopLeftX = 
             xOffset_ 
-            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            + (bodyTrans.transform.translation.x*pixelPerMeter_) 
             - rotatedHeightX 
             - rotatedWidthX;
           double personRectTopLeftY = 
             yOffset_ 
-            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            - (bodyTrans.transform.translation.y*pixelPerMeter_) 
             - rotatedHeightY 
             - rotatedWidthY;
     
           double personRectBottomRightX = 
             xOffset_ 
-            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            + (bodyTrans.transform.translation.x*pixelPerMeter_) 
             + rotatedHeightX 
             + rotatedWidthX;
           double personRectBottomRightY = 
             yOffset_ 
-            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            - (bodyTrans.transform.translation.y*pixelPerMeter_) 
             + rotatedHeightY 
             + rotatedWidthY;
     
           double personRectBottomLeftX = 
             xOffset_ 
-            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            + (bodyTrans.transform.translation.x*pixelPerMeter_) 
             + rotatedHeightX 
             - rotatedWidthX;
           double personRectBottomLeftY = 
             yOffset_ 
-            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            - (bodyTrans.transform.translation.y*pixelPerMeter_) 
             + rotatedHeightY 
             - rotatedWidthY;
     
           double personRectTopRightX = 
             xOffset_ 
-            + (bodyTrans.getOrigin().x()*pixelPerMeter_) 
+            + (bodyTrans.transform.translation.x*pixelPerMeter_) 
             - rotatedHeightX 
             + rotatedWidthX;
           double personRectTopRightY = 
             yOffset_ 
-            - (bodyTrans.getOrigin().y()*pixelPerMeter_) 
+            - (bodyTrans.transform.translation.y*pixelPerMeter_) 
             - rotatedHeightY 
             + rotatedWidthY;
     
@@ -361,8 +376,8 @@ void RadarCanvas::paintEvent(QPaintEvent *event){
             painter.drawText(bottomLeftCorner, distanceInfo);
           }
         }
-        catch(tf::TransformException ex){
-          ROS_WARN("%s", ex.what());
+        catch(tf2::TransformException &ex){
+          RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
         }
       }
   }
@@ -410,7 +425,7 @@ void RadarCanvas::updateArcsToDraw(){
 
 void RadarCanvas::updateFramesList(){
   std::vector<std::string> framesAvailable;
-  tfListener_.getFrameStrings(framesAvailable);
+  tfBuffer_->_getFrameStrings(framesAvailable);
   QStringList framesAvailableQ;
   QString prevValue = ui_->refFrameComboBox->currentText();
 

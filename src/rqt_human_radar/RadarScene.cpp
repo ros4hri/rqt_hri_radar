@@ -11,20 +11,16 @@
 #include <QResizeEvent>
 #include <QSizePolicy>
 
-// ROS Utilities
-#include <ros/package.h>
-#include <ros/console.h>
-
-// ROS messages
-#include <hri_msgs/IdsList.h>
-
 namespace rqt_human_radar {
 
-RadarScene::RadarScene(QWidget *parent) :
+RadarScene::RadarScene(QWidget *parent, rclcpp::Node::SharedPtr node) :
     QWidget(parent),
-    ui_(new Ui::RadarTabs()) {
+    ui_(new Ui::RadarTabs()),
+    node_(node)
+    {
+
   ui_->setupUi(this); 
-  ui_->radarCanvas = new RadarCanvas(this, ui_);
+  ui_->radarCanvas = new RadarCanvas(this, ui_, node_);
 
   connect(ui_->tabWidget, QOverload<int>::of(&QTabWidget::currentChanged), this, &RadarScene::showRadarCanvas);
 }
