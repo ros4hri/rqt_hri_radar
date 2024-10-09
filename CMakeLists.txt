@@ -1,3 +1,17 @@
+# Copyright (c) 2024 PAL Robotics S.L. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 cmake_minimum_required(VERSION 3.14)
 
 project(rqt_human_radar)
@@ -18,10 +32,10 @@ endif()
 # sources #
 ###########
 set(rqt_human_radar_SRCS
-        src/rqt_human_radar/Radar.cpp
-        src/rqt_human_radar/RadarScene.cpp
-        src/rqt_human_radar/RadarCanvas.cpp
-        )
+    src/rqt_human_radar/Radar.cpp
+    src/rqt_human_radar/RadarScene.cpp
+    src/rqt_human_radar/RadarCanvas.cpp
+)
 ###########
 
 
@@ -29,10 +43,10 @@ set(rqt_human_radar_SRCS
 # headers #
 ###########
 set(rqt_human_radar_HDRS
-        include/rqt_human_radar/Radar.hpp
-        include/rqt_human_radar/RadarScene.hpp
-        include/rqt_human_radar/RadarCanvas.hpp
-        )
+    include/rqt_human_radar/Radar.hpp
+    include/rqt_human_radar/RadarScene.hpp
+    include/rqt_human_radar/RadarCanvas.hpp
+)
 ###########
 
 
@@ -40,8 +54,8 @@ set(rqt_human_radar_HDRS
 # ui files #
 ############
 set(rqt_human_radar_UIS
-         resource/radar_tabs.ui
-         )
+    resource/radar_tabs.ui
+)
 ############
 
 qt5_wrap_cpp(rqt_human_radar_MOCS ${rqt_human_radar_HDRS})
@@ -55,7 +69,7 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
         ${rqt_human_radar_SRCS}
         ${rqt_human_radar_MOCS}
         ${rqt_human_radar_UIS_H}
-        )
+)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg)
 
 ament_export_libraries(${PROJECT_NAME})
@@ -73,5 +87,11 @@ install(DIRECTORY res
 )
 
 pluginlib_export_plugin_description_file(rqt_gui "plugin.xml")
+
+# Testing
+if(BUILD_TESTING)
+  ament_auto_find_test_dependencies()
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 ament_auto_package()

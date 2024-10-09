@@ -1,162 +1,179 @@
+// Copyright (c) 2024 PAL Robotics S.L. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 /**
  * @file RadarCanvas.hpp
  * @brief Defines the class for the RadarCanvas widget.
- * 
+ *
  * The widget where the radar background
  * and icons for the rqt-humans-radar are painted
  * taking into account the preferences expressed
  * by the user in the settings tab.
  */
-#ifndef RQT_ENGAGEMENT_RADAR__RADARCANVAS_HPP
-#define RQT_ENGAGEMENT_RADAR__RADARCANVAS_HPP
+#ifndef RQT_HUMAN_RADAR__RADARCANVAS_HPP_
+#define RQT_HUMAN_RADAR__RADARCANVAS_HPP_
+
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 
 #include <QTimer>
-
 #include <QDockWidget>
 #include <QStringList>
 #include <QWidget>
-#include <QtSvg/QSvgWidget>
 #include <QtSvg/QSvgRenderer>
-
-#include <QPen>
+#include <QtSvg/QSvgWidget>
 #include <QBrush>
 #include <QColor>
 #include <QFont>
-
+#include <QPen>
 #include <QImage>
 #include <QSize>
-
 #include <QLine>
 
-#include <rclcpp/rclcpp.hpp>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_ros/buffer.h>
-#include <hri/hri.hpp>
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
+#include <hri/hri.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <geometry_msgs/msg/vector3_stamped.hpp>
 
-
-namespace Ui {
+namespace Ui
+{
 class RadarTabs;
-};   
+}
 
-namespace rqt_human_radar {
+namespace rqt_human_radar
+{
 
-class RadarCanvas :
-    public QWidget {
- Q_OBJECT
-    public:
-        /** 
-         * @brief Constructor
-         */ 
-        RadarCanvas(QWidget *parent, Ui::RadarTabs* ui, rclcpp::Node::SharedPtr node);
+class RadarCanvas : public QWidget
+{
+  Q_OBJECT
 
-        /** 
-         * @brief Destructor
-         */
-        virtual ~RadarCanvas();
+public:
+  /**
+   * @brief Constructor
+   */
+  RadarCanvas(QWidget * parent, Ui::RadarTabs * ui, rclcpp::Node::SharedPtr node);
 
-        void onBody(hri::ConstBodyPtr body);
+  /**
+   * @brief Destructor
+   */
+  virtual ~RadarCanvas();
 
-        void onBodyLost(hri::ID id);
+  void onBody(hri::ConstBodyPtr body);
 
-        void updateFramesList();
-    public slots:
-        /** 
-         * @brief Updating the pixel-per-meter value.
-         */
-        void updatePixelPerMeter();
-        /** 
-         * @brief Reading the user preference about showing or not people ID.
-         * 
-         * The preference is expressed in settings,
-         * through a tick-box. Currently, person ID = <body_id>
-         */
-        void showId();
+  void onBodyLost(hri::ID id);
 
-    protected:
-        /** 
-         * @brief overriding the paintEvent virtual function. 
-         * 
-         * Inherited from QWidget. Paints the entire radar canvas.
-         */
-        void paintEvent(QPaintEvent *event) override;
-        /** 
-         * @brief overriding the resizeEvent virtual function. 
-         * 
-         * Inherited from QWidget. Updates some painting parameters 
-         * according to the new size of the window.
-         */
-        void resizeEvent(QResizeEvent *event) override;
-        /**
-         * @brief overriding the mousePressEvent virtual function
-         * 
-         * Inherited from QWidget. Stores the id of the person 
-         * icon the user has clicked on, if any. 
-         */
-        void mousePressEvent(QMouseEvent* event) override;
+  void updateFramesList();
 
-    private:
-        /**
-         * @brief returns whether or not a point is inside the canvas.
-         */
-        bool inScreen(double& x, double& y) const;
-        /**
-         * @brief updates the number of arcs to draw.
-         * 
-         * The numbers of arcs to draw is defined by the current
-         * size of the canvas. 
-         */
-        void updateArcsToDraw();
+public slots:
+  /**
+   * @brief Updating the pixel-per-meter value.
+   */
+  void updatePixelPerMeter();
+  /**
+   * @brief Reading the user preference about showing or not people ID.
+   *
+   * The preference is expressed in settings,
+   * through a tick-box. Currently, person ID = <body_id>
+   */
+  void showId();
 
-        QTimer *timer_;
+protected:
+  /**
+   * @brief overriding the paintEvent virtual function.
+   *
+   * Inherited from QWidget. Paints the entire radar canvas.
+   */
+  void paintEvent(QPaintEvent * event) override;
+  /**
+   * @brief overriding the resizeEvent virtual function.
+   *
+   * Inherited from QWidget. Updates some painting parameters
+   * according to the new size of the window.
+   */
+  void resizeEvent(QResizeEvent * event) override;
+  /**
+   * @brief overriding the mousePressEvent virtual function
+   *
+   * Inherited from QWidget. Stores the id of the person
+   * icon the user has clicked on, if any.
+   */
+  void mousePressEvent(QMouseEvent * event) override;
 
-        rclcpp::Node::SharedPtr node_;
-        std::shared_ptr<hri::HRIListener> hriListener_;
-        std::shared_ptr<tf2_ros::TransformListener> tfListener_;
-        std::shared_ptr<tf2_ros::Buffer> tfBuffer_;
-        geometry_msgs::msg::Vector3Stamped versor_;
+private:
+  /**
+   * @brief returns whether or not a point is inside the canvas.
+   */
+  bool inScreen(double & x, double & y) const;
+  /**
+   * @brief updates the number of arcs to draw.
+   *
+   * The numbers of arcs to draw is defined by the current
+   * size of the canvas.
+   */
+  void updateArcsToDraw();
 
-        // Drawing and painting objects
-        QPen rangePen_;
-        QBrush oddBrush_, evenBrush_;
-        QFont font_, anglesFont_;
+  QTimer * timer_;
 
-        // Stores the image being drawn
-        QImage robotImage_;
-        bool robotImageFound, personImageFound;
-        std::string package_, robotImageFile_, personSvgFile_;
-        std::map<std::string, QPolygon> peoplePosition_;
+  rclcpp::Node::SharedPtr node_;
+  std::shared_ptr<hri::HRIListener> hriListener_;
+  std::shared_ptr<tf2_ros::TransformListener> tfListener_;
+  std::shared_ptr<tf2_ros::Buffer> tfBuffer_;
+  geometry_msgs::msg::Vector3Stamped versor_;
 
-        // Svg renderer
-        QSvgRenderer svgRenderer_;
-        bool svgRendererInitialized_;
+  // Drawing and painting objects
+  QPen rangePen_;
+  QBrush oddBrush_, evenBrush_;
+  QFont font_, anglesFont_;
 
-        int pixelPerMeter_;
+  // Stores the image being drawn
+  QImage robotImage_;
+  bool robotImageFound, personImageFound;
+  std::string package_, robotImageFile_, personSvgFile_;
+  std::map<std::string, QPolygon> peoplePosition_;
 
-        int arcsToDraw_;
+  // Svg renderer
+  QSvgRenderer svgRenderer_;
+  bool svgRendererInitialized_;
 
-        Qt::CheckState showIdValue_;
+  int pixelPerMeter_;
 
-        // Radar drawing components
-        double xOffset_, yOffset_;
+  int arcsToDraw_;
 
-        // New stuff to avoid using ui
-        QWidget* widget_;
-        Ui::RadarTabs* ui_;
+  Qt::CheckState showIdValue_;
 
-        // ID clicked with mouse
-        std::string idClicked_;
+  // Radar drawing components
+  double xOffset_, yOffset_;
 
-        // Reference frame
-        std::optional<std::string> referenceFrame_;
+  // New stuff to avoid using ui
+  QWidget * widget_;
+  Ui::RadarTabs * ui_;
 
-        // List of humans
-        std::vector<std::string> bodies_;
+  // ID clicked with mouse
+  std::string idClicked_;
 
+  // Reference frame
+  std::optional<std::string> referenceFrame_;
+
+  // List of humans
+  std::vector<std::string> bodies_;
 };
 
-} /* namespace */
-#endif //RQT_TEMPLATE_PLUGIN_TEMPLATEWIDGET_HPP
+}  // namespace rqt_human_radar
+#endif  // RQT_HUMAN_RADAR__RADARCANVAS_HPP_
