@@ -15,17 +15,36 @@
 #ifndef RQT_HUMAN_RADAR__KBOBJECTWIDGET_HPP_
 #define RQT_HUMAN_RADAR__KBOBJECTWIDGET_HPP_
 
+#include <memory>
+#include <string>
+
 #include <QSvgWidget>
+
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 
 class KbObjectWidget : public QSvgWidget {
     Q_OBJECT
 public:
-  KbObjectWidget(const QString &file,
-                 QWidget *parent = nullptr);
+  KbObjectWidget(
+        const std::string &classname,
+        const QString &file,
+        rclcpp::Node::SharedPtr,
+        QWidget *parent = nullptr);
 
+  ~KbObjectWidget();
 protected:
   void mousePressEvent(QMouseEvent *event) override;
   void showContextMenu(const QPoint &);
+
+private:
+
+  std::string classname_;
+  std::string id_;
+  rclcpp::Node::SharedPtr node_;
+
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr kb_add_pub_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr kb_remove_pub_;
 
 };
 

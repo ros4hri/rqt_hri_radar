@@ -465,17 +465,21 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
 
     QMenu contextMenu("Add objects", this);
 
-    const std::map<std::string, std::string> OBJECTS 
-        {{ "book", package_ + "/res/icons/book-open-variant.svg" },
-        { "cup", package_ + "/res/icons/cup-water.svg" },
-        { "phone", package_ + "/res/icons/cellphone.svg" }};
+    // (user-facing name, OWL class name, icon path)
+    const std::vector<std::tuple<std::string, std::string, std::string>> OBJECTS 
+        {{ "book", "Book", package_ + "/res/icons/book-open-variant.svg" },
+        { "cup", "Cup", package_ + "/res/icons/cup-water.svg" },
+        { "phone", "Phone", package_ + "/res/icons/cellphone.svg" }};
 
     for (const auto & object : OBJECTS) {
-        auto action = new QAction((QIcon(object.second.c_str()), 
-                                   "Place a " + object.first).c_str(), 
+        std::string name, classname, icon;
+        std::tie(name, classname, icon) = object;
+
+        auto action = new QAction(QIcon(icon.c_str()), 
+                                   ("Place a " + name).c_str(), 
                                     this);
-        connect(action, &QAction::triggered, this, [object, pos, this]() {
-            createKbObjectWidget(object.second, pos);
+        connect(action, &QAction::triggered, this, [classname, icon, pos, this]() {
+            createKbObjectWidget(classname, icon, pos);
         });
         contextMenu.addAction(action);
     }
@@ -483,8 +487,11 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
     contextMenu.exec(mapToGlobal(pos));
 }
 
-void RadarCanvas::createKbObjectWidget(const std::string &path, const QPoint &pos) {
-    KbObjectWidget *imageWidget = new KbObjectWidget(QString::fromStdString(path), this);
+void RadarCanvas::createKbObjectWidget(const std::string &classname, const std::string &path, const QPoint &pos) {
+    KbObjectWidget *imageWidget = new KbObjectWidget(classname, 
+                                                     QString::fromStdString(path), 
+                                                     node_, 
+                                                     this);
     imageWidget->move(pos);  // Starting position of the new widget
     imageWidget->show();
 }

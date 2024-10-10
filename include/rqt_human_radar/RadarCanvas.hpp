@@ -119,7 +119,7 @@ protected:
 private:
 
   void showContextMenu(const QPoint &);
-  void createKbObjectWidget(const std::string &, const QPoint &);
+  void createKbObjectWidget(const std::string &, const std::string &, const QPoint &);
 
   void dragEnterEvent(QDragEnterEvent *event) override;
   void dragMoveEvent(QDragMoveEvent *event) override;
