@@ -129,7 +129,7 @@ RadarCanvas::RadarCanvas(
   // Retrieving robot and person icons
   try {
     package_ = ament_index_cpp::get_package_share_directory("rqt_human_radar");
-    robotImageFile_ = package_ + "/res/ARI_icon.png";
+    robotImageFile_ = package_ + "/res/ari.svg";
     personSvgFile_ = package_ + "/res/adult_standing_disengaging.svg";
   } catch (const std::exception & e) {
     RCLCPP_ERROR(
@@ -154,7 +154,7 @@ RadarCanvas::RadarCanvas(
 
   // xOffset is meant to be fixed, while yOffset depends
   // on the window size
-  xOffset_ = 50;
+  xOffset_ = 75;
   yOffset_ = parent->size().height() / 2;
 
   // Initial value, it is possible to modify it through settings
@@ -447,10 +447,11 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
     }
   }
 
+  double robotPxSize = 1. * pixelPerMeter_;
   painter.drawImage(
     QRectF(
-      QPointF(xOffset_ - 50, yOffset_ - 50),
-      QPointF(xOffset_ + 50, yOffset_ + 50)),
+      QPointF(xOffset_ - robotPxSize/2, yOffset_ - robotPxSize/2),
+      QPointF(xOffset_ + robotPxSize/2, yOffset_ + robotPxSize/2)),
     robotImage_);
 }
 
