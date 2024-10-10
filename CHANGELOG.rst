@@ -2,6 +2,18 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove 'clear objects' btn, as not needed in basic 'radar' mode
+* minor linting
+* display persons instead of bodies
+  This ensures that both bodies and faces will be displayed
+* redesigned UI
+* ROS 2 linting
+* port to ROS2
+  while here, change license from BSD to Apache 2.0
+* Contributors: Séverin Lemaignan
+
 0.3.0 (2023-05-11)
 ------------------
 * Merge branch 'change-perspective' into 'main'
