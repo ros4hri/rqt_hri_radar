@@ -36,38 +36,39 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
   ui_->radarCanvas = new RadarCanvas(this, ui_, node_);
 
   connect(
-    ui_->tabWidget, QOverload<int>::of(&QTabWidget::currentChanged), this,
-    &RadarScene::showRadarCanvas);
+    ui_->settingsBtn, &QPushButton::clicked, [=]() {
+      ui_->stackedWidget->setCurrentIndex(1);
+      ui_->radarCanvas->hide();
+    });
+  connect(
+    ui_->doneSettingsBtn, &QPushButton::clicked, [=]() {
+      ui_->stackedWidget->setCurrentIndex(0);
+      ui_->radarCanvas->show();
+    });
 }
 
 RadarScene::~RadarScene() {delete ui_;}
 
 void RadarScene::showRadarCanvas()
 {
-  if (ui_->tabWidget->currentIndex() == 0) {
+  if (ui_->stackedWidget->currentIndex() == 0) {
     ui_->radarCanvas->show();
   } else {
     ui_->radarCanvas->hide();
   }
 }
 
-void RadarScene::resizeEvent(QResizeEvent * event)
+void RadarScene::resizeEvent([[maybe_unused]] QResizeEvent * event)
 {
-  ui_->tabWidget->setGeometry(
-    QRect(0, 0, event->size().width(), event->size().height()));
-  ui_->tab->setGeometry(
-    QRect(0, 0, event->size().width(), event->size().height()));
   ui_->radarCanvas->setGeometry(
-    QRect(0, 30, ui_->tab->size().width(), ui_->tab->size().height()));
+       ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));
 }
 
 void RadarScene::showEvent([[maybe_unused]] QShowEvent * event)
 {
-  ui_->tabWidget->setGeometry(
-    QRect(0, 0, this->size().width(), this->size().height()));
-  ui_->radarCanvas->setGeometry(
-    QRect(0, 30, ui_->tab->size().width(), this->size().height()));
-  ui_->tabWidget->setCurrentIndex(0);
+    ui_->radarCanvas->setGeometry(
+         ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));
+  ui_->stackedWidget->setCurrentIndex(0);
 }
 
 }  // namespace rqt_human_radar

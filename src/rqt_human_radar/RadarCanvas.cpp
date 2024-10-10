@@ -134,7 +134,7 @@ RadarCanvas::RadarCanvas(
   // Computation of the number of arcs to draw
   double distanceFromTopRightCorner =
     std::sqrt(
-    std::pow((ui_->tab->size().width() - xOffset_), 2) +
+    std::pow((ui_->stackedWidget->size().width() - xOffset_), 2) +
     std::pow(yOffset_, 2));
   arcsToDraw_ = std::ceil(distanceFromTopRightCorner / pixelPerMeter_);
 
@@ -418,7 +418,7 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 
 void RadarCanvas::resizeEvent([[maybe_unused]] QResizeEvent * event)
 {
-  yOffset_ = ui_->tab->size().height() / 2;
+  yOffset_ = ui_->stackedWidget->size().height() / 2;
 
   updateArcsToDraw();
 }
@@ -459,7 +459,7 @@ void RadarCanvas::updateArcsToDraw()
 {
   double distanceFromTopRightCorner =
     std::sqrt(
-    std::pow((ui_->tab->size().width() - xOffset_), 2) +
+    std::pow((ui_->stackedWidget->size().width() - xOffset_), 2) +
     std::pow(yOffset_, 2));
   arcsToDraw_ = std::ceil(distanceFromTopRightCorner / pixelPerMeter_);
 }
