@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2024-10-10)
+------------------
 * remove 'clear objects' btn, as not needed in basic 'radar' mode
 * minor linting
 * display persons instead of bodies
