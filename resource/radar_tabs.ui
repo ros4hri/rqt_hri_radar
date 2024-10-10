@@ -86,6 +86,29 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <italic>true</italic>
+         </font>
+        </property>
+        <property name="text">
+         <string>(right click on radar to insert object)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearObjectsBtn">
+        <property name="text">
+         <string>Clear objects</string>
+        </property>
+        <property name="icon">
+         <iconset theme="edit-clear">
+          <normaloff>.</normaloff>.</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -272,6 +295,7 @@
   <tabstop>reloadButton</tabstop>
   <tabstop>idCheckbox</tabstop>
   <tabstop>doneSettingsBtn</tabstop>
+  <tabstop>clearObjectsBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>
