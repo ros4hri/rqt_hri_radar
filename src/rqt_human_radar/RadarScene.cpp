@@ -36,12 +36,12 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
   ui_->radarCanvas = new RadarCanvas(this, ui_, node_);
 
   connect(
-    ui_->settingsBtn, &QPushButton::clicked, [=]() {
+    ui_->settingsBtn, &QPushButton::clicked, [ = ]() {
       ui_->stackedWidget->setCurrentIndex(1);
       ui_->radarCanvas->hide();
     });
   connect(
-    ui_->doneSettingsBtn, &QPushButton::clicked, [=]() {
+    ui_->doneSettingsBtn, &QPushButton::clicked, [ = ]() {
       ui_->stackedWidget->setCurrentIndex(0);
       ui_->radarCanvas->show();
     });
@@ -61,13 +61,13 @@ void RadarScene::showRadarCanvas()
 void RadarScene::resizeEvent([[maybe_unused]] QResizeEvent * event)
 {
   ui_->radarCanvas->setGeometry(
-       ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));
+    ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));
 }
 
 void RadarScene::showEvent([[maybe_unused]] QShowEvent * event)
 {
-    ui_->radarCanvas->setGeometry(
-         ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));
+  ui_->radarCanvas->setGeometry(
+    ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));
   ui_->stackedWidget->setCurrentIndex(0);
 }
 
