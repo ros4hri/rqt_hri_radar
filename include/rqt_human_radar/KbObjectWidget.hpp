@@ -18,10 +18,12 @@
 #include <memory>
 #include <string>
 
+#include <QTimer>
 #include <QSvgWidget>
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 
 class KbObjectWidget : public QSvgWidget {
     Q_OBJECT
@@ -30,6 +32,8 @@ public:
         const std::string &classname,
         const QString &file,
         rclcpp::Node::SharedPtr,
+        int pixelPerMeter,
+        std::optional<std::string> referenceFrame,
         QWidget *parent = nullptr);
 
   ~KbObjectWidget();
@@ -39,6 +43,8 @@ protected:
 
 private:
 
+  void broadcastTransform();
+
   std::string classname_;
   std::string id_;
   rclcpp::Node::SharedPtr node_;
@@ -46,6 +52,15 @@ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr kb_add_pub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr kb_remove_pub_;
 
+  tf2_ros::TransformBroadcaster tf_broadcaster_;
+
+  QTimer *timer_;
+  int pixelPerMeter_;
+
+  // Reference frame
+  std::optional<std::string> referenceFrame_;
+
+  double xOffset_, yOffset_;
 };
 
 #endif  // RQT_HUMAN_RADAR__KBOBJECTWIDGET_HPP_

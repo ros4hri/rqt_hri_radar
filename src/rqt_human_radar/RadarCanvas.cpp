@@ -81,17 +81,32 @@ RadarCanvas::RadarCanvas(
 
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, &RadarCanvas::customContextMenuRequested, this,
-    &RadarCanvas::showContextMenu);
+          &RadarCanvas::showContextMenu);
 
   connect(
-    ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this,
-    &RadarCanvas::updatePixelPerMeter);
+          ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this,
+          &RadarCanvas::updatePixelPerMeter);
   connect(
-    ui_->idCheckbox, QOverload<int>::of(&QCheckBox::stateChanged), this,
-    &RadarCanvas::showId);
+          ui_->idCheckbox, QOverload<int>::of(&QCheckBox::stateChanged), this,
+          &RadarCanvas::showId);
   connect(
-    ui_->reloadButton, &QPushButton::clicked, this,
-    &RadarCanvas::updateFramesList);
+          ui_->reloadButton, &QPushButton::clicked, this,
+          &RadarCanvas::updateFramesList);
+
+  QString currentFrameSet = ui_->refFrameComboBox->currentText();
+  if (!currentFrameSet.isEmpty()) {
+      RCLCPP_INFO(node_->get_logger(), "Current frame set: %s", currentFrameSet.toStdString().c_str());
+      referenceFrame_ = currentFrameSet.toStdString();
+  }
+  connect(
+          ui_->refFrameComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+          [this](int index) {
+            QString frame = ui_->refFrameComboBox->itemText(index);
+            if (!frame.isEmpty()) {
+              RCLCPP_INFO(node_->get_logger(), "Current frame set: %s", frame.toStdString().c_str());
+              referenceFrame_ = frame.toStdString();
+            }
+          });
 
   // Retrieving robot and person icons
   try {
@@ -298,13 +313,6 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
     versor_.header.frame_id = personFrame;
     geometry_msgs::msg::TransformStamped personTrans;
 
-    QString currentFrameSet = ui_->refFrameComboBox->currentText();
-    if (currentFrameSet.isEmpty()) {
-      referenceFrame_.reset();
-      updateFramesList();
-    } else {
-      referenceFrame_ = currentFrameSet.toStdString();
-    }
 
     if (referenceFrame_) {
       try {
@@ -491,6 +499,8 @@ void RadarCanvas::createKbObjectWidget(const std::string &classname, const std::
     KbObjectWidget *imageWidget = new KbObjectWidget(classname, 
                                                      QString::fromStdString(path), 
                                                      node_, 
+                                                     pixelPerMeter_,
+                                                     referenceFrame_,
                                                      this);
     imageWidget->move(pos);  // Starting position of the new widget
     imageWidget->show();

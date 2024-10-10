@@ -124,7 +124,7 @@
       <enum>QFrame::Box</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="radarPage">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -222,14 +222,32 @@
             </size>
            </property>
            <property name="currentText">
-            <string/>
+            <string>sellion_link</string>
            </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>sellion_link</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>base_link</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>map</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="reloadButton">
            <property name="text">
-            <string>refresh frames</string>
+            <string>refresh frame list</string>
            </property>
            <property name="icon">
             <iconset theme="reload">

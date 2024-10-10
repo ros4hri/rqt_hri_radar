@@ -18,7 +18,10 @@
 #include <QMimeData>
 #include <QMouseEvent>
 
+
 #include <random>
+
+#include "geometry_msgs/msg/transform_stamped.hpp"
 
 #include "rqt_human_radar/KbObjectWidget.hpp"
 
@@ -40,10 +43,15 @@ KbObjectWidget::KbObjectWidget(
         const std::string &classname,
         const QString &file,
         rclcpp::Node::SharedPtr node,
+        int pixelPerMeter,
+        std::optional<std::string> referenceFrame,
         QWidget *parent)
     : QSvgWidget(file, parent), 
         classname_(classname),
-        node_(node)
+        node_(node),
+        tf_broadcaster_(node),
+        pixelPerMeter_(pixelPerMeter),
+        referenceFrame_(referenceFrame)
 {
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, &KbObjectWidget::customContextMenuRequested, this,
@@ -62,6 +70,17 @@ KbObjectWidget::KbObjectWidget(
   msg.data = id_ + " rdf:type " + classname_;
 
   kb_add_pub_->publish(msg);
+  
+  // TODO: get this value directly from the RadarCanvas and make sure it is updated
+  // when the window is resized
+  // xOffset is meant to be fixed, while yOffset depends
+  // on the window size
+  xOffset_ = 50;
+  yOffset_ = parent->size().height() / 2;
+
+  timer_ = new QTimer(this);
+  connect(timer_, &QTimer::timeout, this, &KbObjectWidget::broadcastTransform);
+  timer_->start(50);  // milliseconds
 
 }
 
@@ -99,4 +118,28 @@ void KbObjectWidget::mousePressEvent(QMouseEvent *event) {
 
         drag->exec(Qt::MoveAction);
     }
+}
+
+
+void KbObjectWidget::broadcastTransform() {
+
+    if (!referenceFrame_) return;
+
+    geometry_msgs::msg::TransformStamped transformStamped;
+
+    transformStamped.header.stamp = node_->now();
+    transformStamped.header.frame_id = *referenceFrame_;
+    transformStamped.child_frame_id = id_;
+
+    transformStamped.transform.translation.x = (x() - xOffset_)/float(pixelPerMeter_);
+    transformStamped.transform.translation.y = -(y() - yOffset_)/float(pixelPerMeter_);
+    transformStamped.transform.translation.z = 0.0;
+
+    transformStamped.transform.rotation.x = 0.0;
+    transformStamped.transform.rotation.y = 0.0;
+    transformStamped.transform.rotation.z = 0.0;
+    transformStamped.transform.rotation.w = 1.0;
+
+    tf_broadcaster_.sendTransform(transformStamped);
+
 }
