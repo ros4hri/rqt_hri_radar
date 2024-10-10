@@ -84,8 +84,18 @@ RadarCanvas::RadarCanvas(
           &RadarCanvas::showContextMenu);
 
   connect(
-          ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this,
-          &RadarCanvas::updatePixelPerMeter);
+          ui_->zoomLevel, &QSlider::valueChanged, [this](int value) {
+
+            pixelPerMeter_ = value;
+            updateArcsToDraw();
+            update();
+
+            for (auto & widget : kbObjects_) {
+                widget->reposition();
+            }
+        });
+
+
   connect(
           ui_->idCheckbox, QOverload<int>::of(&QCheckBox::stateChanged), this,
           &RadarCanvas::showId);
@@ -456,16 +466,6 @@ void RadarCanvas::resizeEvent([[maybe_unused]] QResizeEvent * event)
 
 }
 
-void RadarCanvas::updatePixelPerMeter()
-{
-  pixelPerMeter_ = ui_->ppmSpinBox->value();
-  updateArcsToDraw();
-  update();
-
-  for (auto & widget : kbObjects_) {
-    widget->reposition();
-  }
-}
 
 void RadarCanvas::showId()
 {

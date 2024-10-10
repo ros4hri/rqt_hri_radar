@@ -45,6 +45,16 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
       ui_->stackedWidget->setCurrentIndex(0);
       ui_->radarCanvas->show();
     });
+
+  connect(
+    ui_->zoomIn, &QPushButton::clicked, [ = ]() {
+      ui_->zoomLevel->setValue(ui_->zoomLevel->value() + ui_->zoomLevel->singleStep());
+    });
+
+  connect(
+    ui_->zoomOut, &QPushButton::clicked, [ = ]() {
+      ui_->zoomLevel->setValue(ui_->zoomLevel->value() - ui_->zoomLevel->singleStep());
+    });
 }
 
 RadarScene::~RadarScene() {delete ui_;}

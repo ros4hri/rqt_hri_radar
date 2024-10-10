@@ -85,10 +85,6 @@ public:
 
 public slots:
   /**
-   * @brief Updating the pixel-per-meter value.
-   */
-  void updatePixelPerMeter();
-  /**
    * @brief Reading the user preference about showing or not people ID.
    *
    * The preference is expressed in settings,
