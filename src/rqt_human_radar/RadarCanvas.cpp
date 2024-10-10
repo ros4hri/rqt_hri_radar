@@ -147,26 +147,26 @@ RadarCanvas::RadarCanvas(
   // Reading the value representing whether we should display people ids or not
   showIdValue_ = ui_->idCheckbox->checkState();
 
-  // Setting callbacks for new/removed bodies
-  hriListener_->onBody(
-    std::bind(&RadarCanvas::onBody, this, std::placeholders::_1));
-  hriListener_->onBodyLost(
-    std::bind(&RadarCanvas::onBodyLost, this, std::placeholders::_1));
+  // Setting callbacks for new/removed persons
+  hriListener_->onTrackedPerson(
+    std::bind(&RadarCanvas::onTrackedPerson, this, std::placeholders::_1));
+  hriListener_->onTrackedPersonLost(
+    std::bind(&RadarCanvas::onTrackedPersonLost, this, std::placeholders::_1));
 
   update();
 }
 
 RadarCanvas::~RadarCanvas() {}
 
-void RadarCanvas::onBody(hri::ConstBodyPtr body)
+void RadarCanvas::onTrackedPerson(hri::ConstPersonPtr person)
 {
-  bodies_.push_back(body->id());
+  persons_.push_back(person->id());
 }
 
-void RadarCanvas::onBodyLost(hri::ID id)
+void RadarCanvas::onTrackedPersonLost(hri::ID id)
 {
-  auto body = std::find(bodies_.begin(), bodies_.end(), id);
-  bodies_.erase(body);
+  auto person = std::find(persons_.begin(), persons_.end(), id);
+  persons_.erase(person);
 }
 
 void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
@@ -274,17 +274,17 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
   painter.setBrush(QBrush(Qt::transparent));
   painter.setPen(QPen(Qt::black));
 
-  // Drawing people. Using body_<body_id> frames
+  // Drawing people. Using person_<person_id> frames
   // to define people's position and orientation
-  auto bodies = hriListener_->getBodies();
+  auto persons = hriListener_->getTrackedPersons();
   peoplePosition_.clear();
-  for (auto & body : bodies) {
+  for (auto & person : persons) {
     geometry_msgs::msg::Vector3Stamped rotatedVersor;
 
-    std::string id = body.first;
-    std::string bodyFrame = "body_" + id;
-    versor_.header.frame_id = bodyFrame;
-    geometry_msgs::msg::TransformStamped bodyTrans;
+    std::string id = person.first;
+    std::string personFrame = person.second->frame();
+    versor_.header.frame_id = personFrame;
+    geometry_msgs::msg::TransformStamped personTrans;
 
     QString currentFrameSet = ui_->refFrameComboBox->currentText();
     if (currentFrameSet.isEmpty()) {
@@ -296,15 +296,15 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 
     if (referenceFrame_) {
       try {
-        bodyTrans = tfBuffer_->lookupTransform(
-          *referenceFrame_, bodyFrame, rclcpp::Time(0),
+        personTrans = tfBuffer_->lookupTransform(
+          *referenceFrame_, personFrame, rclcpp::Time(0),
           rclcpp::Duration(1, 0));   // 1-second timeout;
-        tf2::doTransform(versor_, rotatedVersor, bodyTrans);
+        tf2::doTransform(versor_, rotatedVersor, personTrans);
 
         double distance =
           std::sqrt(
-          std::pow(bodyTrans.transform.translation.x, 2) +
-          std::pow(bodyTrans.transform.translation.y, 2));
+          std::pow(personTrans.transform.translation.x, 2) +
+          std::pow(personTrans.transform.translation.y, 2));
         double theta =
           std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
         theta += M_PI / 2;
@@ -329,31 +329,31 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
         // Computing vertices of the rotated rectangle
 
         double personRectTopLeftX =
-          xOffset_ + (bodyTrans.transform.translation.x * pixelPerMeter_) -
+          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) -
           rotatedHeightX - rotatedWidthX;
         double personRectTopLeftY =
-          yOffset_ - (bodyTrans.transform.translation.y * pixelPerMeter_) -
+          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) -
           rotatedHeightY - rotatedWidthY;
 
         double personRectBottomRightX =
-          xOffset_ + (bodyTrans.transform.translation.x * pixelPerMeter_) +
+          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) +
           rotatedHeightX + rotatedWidthX;
         double personRectBottomRightY =
-          yOffset_ - (bodyTrans.transform.translation.y * pixelPerMeter_) +
+          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) +
           rotatedHeightY + rotatedWidthY;
 
         double personRectBottomLeftX =
-          xOffset_ + (bodyTrans.transform.translation.x * pixelPerMeter_) +
+          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) +
           rotatedHeightX - rotatedWidthX;
         double personRectBottomLeftY =
-          yOffset_ - (bodyTrans.transform.translation.y * pixelPerMeter_) +
+          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) +
           rotatedHeightY - rotatedWidthY;
 
         double personRectTopRightX =
-          xOffset_ + (bodyTrans.transform.translation.x * pixelPerMeter_) -
+          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) -
           rotatedHeightX + rotatedWidthX;
         double personRectTopRightY =
-          yOffset_ - (bodyTrans.transform.translation.y * pixelPerMeter_) -
+          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) -
           rotatedHeightY + rotatedWidthY;
 
         QPointF topLeftCorner(personRectTopLeftX, personRectTopLeftY);

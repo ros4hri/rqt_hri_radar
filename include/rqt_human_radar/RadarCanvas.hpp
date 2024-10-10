@@ -75,9 +75,9 @@ public:
    */
   virtual ~RadarCanvas();
 
-  void onBody(hri::ConstBodyPtr body);
+  void onTrackedPerson(hri::ConstPersonPtr person);
 
-  void onBodyLost(hri::ID id);
+  void onTrackedPersonLost(hri::ID id);
 
   void updateFramesList();
 
@@ -90,7 +90,7 @@ public slots:
    * @brief Reading the user preference about showing or not people ID.
    *
    * The preference is expressed in settings,
-   * through a tick-box. Currently, person ID = <body_id>
+   * through a tick-box. Currently, person ID = <person_id>
    */
   void showId();
 
@@ -172,7 +172,7 @@ private:
   std::optional<std::string> referenceFrame_;
 
   // List of humans
-  std::vector<std::string> bodies_;
+  std::vector<std::string> persons_;
 };
 
 }  // namespace rqt_human_radar
