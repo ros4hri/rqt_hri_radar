@@ -19,7 +19,10 @@
 
 #include "rqt_human_radar/RadarCanvas.hpp"
 
+#include <QAction>
 #include <QCheckBox>
+#include <QContextMenuEvent>
+#include <QMenu>
 #include <QPainter>
 #include <QPolygon>
 #include <QPushButton>
@@ -36,6 +39,8 @@
 
 #include "./ui_radar_tabs.h"
 
+#include "rqt_human_radar/KbObjectWidget.hpp"
+
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <hri_msgs/msg/ids_list.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>  // For transforming geometry_msgs types
@@ -43,6 +48,7 @@
 std::vector<double> SPECIAL_ANGLES = {0, 30, 60, 90, 120, 150, 180};
 const double SVG_SIZE_RATIO = 1.4857;
 const double SVG_PERSON_WIDTH = 70;
+
 
 namespace rqt_human_radar
 {
@@ -52,6 +58,8 @@ RadarCanvas::RadarCanvas(
   rclcpp::Node::SharedPtr node)
 : QWidget(parent), node_(node)
 {
+  setAcceptDrops(true);
+
   hriListener_ = hri::HRIListener::create(node_);
 
   tfBuffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
@@ -70,6 +78,10 @@ RadarCanvas::RadarCanvas(
   */
 
   this->ui_ = ui;
+
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, &RadarCanvas::customContextMenuRequested, this,
+    &RadarCanvas::showContextMenu);
 
   connect(
     ui_->ppmSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this,
@@ -447,6 +459,53 @@ void RadarCanvas::mousePressEvent(QMouseEvent * event)
       return;  // No more than one clicked person at a time
     }
   }
+}
+
+void RadarCanvas::showContextMenu(const QPoint &pos) {
+
+    QMenu contextMenu("Add objects", this);
+
+    const std::map<std::string, std::string> OBJECTS 
+        {{ "book", package_ + "/res/icons/book-open-variant.svg" },
+        { "cup", package_ + "/res/icons/cup-water.svg" },
+        { "phone", package_ + "/res/icons/cellphone.svg" }};
+
+    for (const auto & object : OBJECTS) {
+        auto action = new QAction((QIcon(object.second.c_str()), "Place a " + object.first).c_str(), this);
+        connect(action, &QAction::triggered, this, [object, pos, this]() {
+            createKbObjectWidget(object.second, pos);
+        });
+        contextMenu.addAction(action);
+    }
+
+    contextMenu.exec(mapToGlobal(pos));
+}
+
+void RadarCanvas::createKbObjectWidget(const std::string &path, const QPoint &pos) {
+    KbObjectWidget *imageWidget = new KbObjectWidget(QString::fromStdString(path), this);
+    imageWidget->move(pos);  // Starting position of the new widget
+    imageWidget->show();
+}
+
+void RadarCanvas::dragEnterEvent(QDragEnterEvent *event) {
+    event->acceptProposedAction();
+}
+
+void RadarCanvas::dragMoveEvent(QDragMoveEvent *event) {
+    // Accept the drag move if it stays within the widget bounds
+    if (rect().contains(event->pos())) {
+        event->acceptProposedAction();
+    }
+}
+
+void RadarCanvas::dropEvent(QDropEvent *event) {
+    if (event->source()) {
+
+        KbObjectWidget *draggedWidget = qobject_cast<KbObjectWidget *>(event->source());
+        draggedWidget->move(event->pos() - draggedWidget->rect().center());
+        draggedWidget->show();
+        event->acceptProposedAction();
+    }
 }
 
 bool RadarCanvas::inScreen(double & x, double & y) const

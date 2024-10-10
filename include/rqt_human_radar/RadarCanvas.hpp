@@ -117,6 +117,14 @@ protected:
   void mousePressEvent(QMouseEvent * event) override;
 
 private:
+
+  void showContextMenu(const QPoint &);
+  void createKbObjectWidget(const std::string &, const QPoint &);
+
+  void dragEnterEvent(QDragEnterEvent *event) override;
+  void dragMoveEvent(QDragMoveEvent *event) override;
+  void dropEvent(QDropEvent *event) override;
+
   /**
    * @brief returns whether or not a point is inside the canvas.
    */

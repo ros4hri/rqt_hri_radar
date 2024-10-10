@@ -113,9 +113,6 @@
          <property name="cursor">
           <cursorShape>CrossCursor</cursorShape>
          </property>
-         <property name="contextMenuPolicy">
-          <enum>Qt::ActionsContextMenu</enum>
-         </property>
         </widget>
        </item>
       </layout>
