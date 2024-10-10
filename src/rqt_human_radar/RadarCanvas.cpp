@@ -22,6 +22,7 @@
 #include <QAction>
 #include <QCheckBox>
 #include <QContextMenuEvent>
+#include <QCursor>
 #include <QMenu>
 #include <QPainter>
 #include <QPolygon>
@@ -39,7 +40,6 @@
 
 #include "./ui_radar_tabs.h"
 
-#include "rqt_human_radar/KbObjectWidget.hpp"
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <hri_msgs/msg/ids_list.hpp>
@@ -107,6 +107,14 @@ RadarCanvas::RadarCanvas(
               referenceFrame_ = frame.toStdString();
             }
           });
+
+   connect(
+           ui_->clearObjectsBtn, &QPushButton::clicked, [this]() {
+               for (auto & widget : kbObjects_) {
+                   widget->deleteLater();
+               }
+               kbObjects_.clear();
+           });
 
   // Retrieving robot and person icons
   try {
@@ -441,6 +449,11 @@ void RadarCanvas::resizeEvent([[maybe_unused]] QResizeEvent * event)
   yOffset_ = ui_->stackedWidget->size().height() / 2;
 
   updateArcsToDraw();
+
+  for (auto & widget : kbObjects_) {
+    widget->reposition();
+  }
+
 }
 
 void RadarCanvas::updatePixelPerMeter()
@@ -448,6 +461,10 @@ void RadarCanvas::updatePixelPerMeter()
   pixelPerMeter_ = ui_->ppmSpinBox->value();
   updateArcsToDraw();
   update();
+
+  for (auto & widget : kbObjects_) {
+    widget->reposition();
+  }
 }
 
 void RadarCanvas::showId()
@@ -486,8 +503,8 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
         auto action = new QAction(QIcon(icon.c_str()), 
                                    ("Place a " + name).c_str(), 
                                     this);
-        connect(action, &QAction::triggered, this, [classname, icon, pos, this]() {
-            createKbObjectWidget(classname, icon, pos);
+        connect(action, &QAction::triggered, this, [classname, icon, this]() {
+            createKbObjectWidget(classname, icon);
         });
         contextMenu.addAction(action);
     }
@@ -495,15 +512,15 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
     contextMenu.exec(mapToGlobal(pos));
 }
 
-void RadarCanvas::createKbObjectWidget(const std::string &classname, const std::string &path, const QPoint &pos) {
+void RadarCanvas::createKbObjectWidget(const std::string &classname, const std::string &path) {
     KbObjectWidget *imageWidget = new KbObjectWidget(classname, 
                                                      QString::fromStdString(path), 
                                                      node_, 
-                                                     pixelPerMeter_,
-                                                     referenceFrame_,
                                                      this);
-    imageWidget->move(pos);  // Starting position of the new widget
+    kbObjects_.push_back(imageWidget);
+    imageWidget->pxPlace(mapFromGlobal(QCursor::pos()));
     imageWidget->show();
+
 }
 
 void RadarCanvas::dragEnterEvent(QDragEnterEvent *event) {
@@ -521,7 +538,7 @@ void RadarCanvas::dropEvent(QDropEvent *event) {
     if (event->source()) {
 
         KbObjectWidget *draggedWidget = qobject_cast<KbObjectWidget *>(event->source());
-        draggedWidget->move(event->pos() - draggedWidget->rect().center());
+        draggedWidget->pxPlace(event->pos());
         draggedWidget->show();
         event->acceptProposedAction();
     }

@@ -25,6 +25,9 @@
 #include <std_msgs/msg/string.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 
+namespace rqt_human_radar 
+{
+
 class KbObjectWidget : public QSvgWidget {
     Q_OBJECT
 public:
@@ -32,14 +35,35 @@ public:
         const std::string &classname,
         const QString &file,
         rclcpp::Node::SharedPtr,
-        int pixelPerMeter,
-        std::optional<std::string> referenceFrame,
         QWidget *parent = nullptr);
 
   ~KbObjectWidget();
+
+
+  /**
+   * @brief Set the (x,y) position of the object in real world coordinates.
+   *
+   * @param x x coordinate in meters
+   * @param y y coordinate in meters
+   */
+  void place(double x, double y);
+
+  void reposition() {
+    place(x_, y_);
+  }
+
+  /**
+   * @brief Set the (x,y) position of the object in pixels.
+   *
+   * @param x x coordinate in pixels
+   * @param y y coordinate in pixels
+   */
+  void pxPlace(const QPoint &);
+
 protected:
   void mousePressEvent(QMouseEvent *event) override;
   void showContextMenu(const QPoint &);
+  void resizeEvent(QResizeEvent *) override;
 
 private:
 
@@ -60,7 +84,9 @@ private:
   // Reference frame
   std::optional<std::string> referenceFrame_;
 
-  double xOffset_, yOffset_;
+  double x_, y_;
 };
+
+}  // namespace rqt_human_radar
 
 #endif  // RQT_HUMAN_RADAR__KBOBJECTWIDGET_HPP_

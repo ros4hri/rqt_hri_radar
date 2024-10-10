@@ -52,6 +52,8 @@
 
 #include <geometry_msgs/msg/vector3_stamped.hpp>
 
+#include "rqt_human_radar/KbObjectWidget.hpp"
+
 namespace Ui
 {
 class RadarTabs;
@@ -94,6 +96,18 @@ public slots:
    */
   void showId();
 
+  std::tuple<double, double> getOffset() const {
+    return {xOffset_, yOffset_};
+  }
+
+  int getPixelPerMeter() const {
+    return pixelPerMeter_;
+  }
+
+  std::optional<std::string> getReferenceFrame() const {
+    return referenceFrame_;
+  }
+
 protected:
   /**
    * @brief overriding the paintEvent virtual function.
@@ -119,7 +133,7 @@ protected:
 private:
 
   void showContextMenu(const QPoint &);
-  void createKbObjectWidget(const std::string &, const std::string &, const QPoint &);
+  void createKbObjectWidget(const std::string &, const std::string &);
 
   void dragEnterEvent(QDragEnterEvent *event) override;
   void dragMoveEvent(QDragMoveEvent *event) override;
@@ -181,6 +195,8 @@ private:
 
   // List of humans
   std::vector<std::string> persons_;
+
+  std::vector<KbObjectWidget *> kbObjects_;
 };
 
 }  // namespace rqt_human_radar

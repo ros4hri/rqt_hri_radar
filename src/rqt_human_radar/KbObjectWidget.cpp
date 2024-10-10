@@ -23,6 +23,7 @@
 
 #include "geometry_msgs/msg/transform_stamped.hpp"
 
+#include "rqt_human_radar/RadarCanvas.hpp"
 #include "rqt_human_radar/KbObjectWidget.hpp"
 
 std::string generateRandomSuffix(size_t length = 5) {
@@ -38,20 +39,18 @@ std::string generateRandomSuffix(size_t length = 5) {
     return result;
 }
 
+namespace rqt_human_radar
+{
 
 KbObjectWidget::KbObjectWidget(
         const std::string &classname,
         const QString &file,
         rclcpp::Node::SharedPtr node,
-        int pixelPerMeter,
-        std::optional<std::string> referenceFrame,
         QWidget *parent)
     : QSvgWidget(file, parent), 
         classname_(classname),
         node_(node),
-        tf_broadcaster_(node),
-        pixelPerMeter_(pixelPerMeter),
-        referenceFrame_(referenceFrame)
+        tf_broadcaster_(node)
 {
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, &KbObjectWidget::customContextMenuRequested, this,
@@ -70,13 +69,6 @@ KbObjectWidget::KbObjectWidget(
   msg.data = id_ + " rdf:type " + classname_;
 
   kb_add_pub_->publish(msg);
-  
-  // TODO: get this value directly from the RadarCanvas and make sure it is updated
-  // when the window is resized
-  // xOffset is meant to be fixed, while yOffset depends
-  // on the window size
-  xOffset_ = 50;
-  yOffset_ = parent->size().height() / 2;
 
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, &KbObjectWidget::broadcastTransform);
@@ -104,6 +96,34 @@ void KbObjectWidget::showContextMenu(const QPoint &pos) {
     contextMenu.exec(mapToGlobal(pos));
 }
 
+void KbObjectWidget::place(double x, double y) {
+    x_ = x;
+    y_ = y;
+
+    RadarCanvas *canvas = qobject_cast<RadarCanvas *>(parent());
+
+    auto [xOffset, yOffset] = canvas->getOffset();
+    int pixelPerMeter = canvas->getPixelPerMeter();
+
+    move(QPoint(xOffset + x * pixelPerMeter, yOffset - y * pixelPerMeter) - rect().center());
+}
+
+void KbObjectWidget::pxPlace(const QPoint &pos) {
+    RadarCanvas *canvas = qobject_cast<RadarCanvas *>(parent());
+
+    auto [xOffset, yOffset] = canvas->getOffset();
+    int pixelPerMeter = canvas->getPixelPerMeter();
+
+    x_ = (pos.x() - xOffset) / double(pixelPerMeter);
+    y_ = (yOffset - pos.y()) / double(pixelPerMeter);
+
+    place(x_, y_);
+}
+
+void KbObjectWidget::resizeEvent([[maybe_unused]] QResizeEvent * event)
+{
+    place(x_, y_);
+}
 
 void KbObjectWidget::mousePressEvent(QMouseEvent *event) {
 
@@ -123,16 +143,19 @@ void KbObjectWidget::mousePressEvent(QMouseEvent *event) {
 
 void KbObjectWidget::broadcastTransform() {
 
-    if (!referenceFrame_) return;
+    RadarCanvas *canvas = qobject_cast<RadarCanvas *>(parent());
+
+    auto referenceFrame = canvas->getReferenceFrame();
+    if (!referenceFrame) return;
 
     geometry_msgs::msg::TransformStamped transformStamped;
 
     transformStamped.header.stamp = node_->now();
-    transformStamped.header.frame_id = *referenceFrame_;
+    transformStamped.header.frame_id = *referenceFrame;
     transformStamped.child_frame_id = id_;
 
-    transformStamped.transform.translation.x = (x() - xOffset_)/float(pixelPerMeter_);
-    transformStamped.transform.translation.y = -(y() - yOffset_)/float(pixelPerMeter_);
+    transformStamped.transform.translation.x = x_;
+    transformStamped.transform.translation.y = y_;
     transformStamped.transform.translation.z = 0.0;
 
     transformStamped.transform.rotation.x = 0.0;
@@ -143,3 +166,5 @@ void KbObjectWidget::broadcastTransform() {
     tf_broadcaster_.sendTransform(transformStamped);
 
 }
+
+}  // namespace rqt_human_radar
