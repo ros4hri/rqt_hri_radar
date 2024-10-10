@@ -94,7 +94,7 @@
          </font>
         </property>
         <property name="text">
-         <string>(right click on radar to insert object)</string>
+         <string>(right click on radar to insert objects)</string>
         </property>
        </widget>
       </item>

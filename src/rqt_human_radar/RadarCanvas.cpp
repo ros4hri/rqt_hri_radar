@@ -471,7 +471,9 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
         { "phone", package_ + "/res/icons/cellphone.svg" }};
 
     for (const auto & object : OBJECTS) {
-        auto action = new QAction((QIcon(object.second.c_str()), "Place a " + object.first).c_str(), this);
+        auto action = new QAction((QIcon(object.second.c_str()), 
+                                   "Place a " + object.first).c_str(), 
+                                    this);
         connect(action, &QAction::triggered, this, [object, pos, this]() {
             createKbObjectWidget(object.second, pos);
         });

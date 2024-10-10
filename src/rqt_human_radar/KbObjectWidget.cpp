@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <QAction>
 #include <QDrag>
-#include <QMouseEvent>
+#include <QMenu>
 #include <QMimeData>
+#include <QMouseEvent>
 
 #include "rqt_human_radar/KbObjectWidget.hpp"
 
@@ -23,8 +25,8 @@ KbObjectWidget::KbObjectWidget(const QString &file,
     : QSvgWidget(file, parent)
 {
   setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(this, &RadarCanvas::customContextMenuRequested, this,
-    &RadarCanvas::showContextMenu);
+  connect(this, &KbObjectWidget::customContextMenuRequested, this,
+    &KbObjectWidget::showContextMenu);
 
 }
 
@@ -32,10 +34,10 @@ void KbObjectWidget::showContextMenu(const QPoint &pos) {
 
     QMenu contextMenu("Manage objects", this);
 
-    auto delete_action = new QAction((QIcon("edit-delete"), "Delete", this);
+    auto delete_action = new QAction(QIcon::fromTheme("edit-delete"), "Delete", this);
 
-    connect(delete_action, &QAction::triggered, this, [object, pos, this]() {
-            createKbObjectWidget(object.second, pos);
+    connect(delete_action, &QAction::triggered, this, [this]() {
+            this->deleteLater();
         });
     contextMenu.addAction(delete_action);
     contextMenu.exec(mapToGlobal(pos));

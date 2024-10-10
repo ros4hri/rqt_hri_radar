@@ -21,10 +21,12 @@ class KbObjectWidget : public QSvgWidget {
     Q_OBJECT
 public:
   KbObjectWidget(const QString &file,
-                                QWidget *parent = nullptr);
+                 QWidget *parent = nullptr);
 
 protected:
   void mousePressEvent(QMouseEvent *event) override;
+  void showContextMenu(const QPoint &);
+
 };
 
 #endif  // RQT_HUMAN_RADAR__KBOBJECTWIDGET_HPP_
