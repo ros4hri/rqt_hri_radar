@@ -20,6 +20,7 @@
 
 #include <QResizeEvent>
 #include <QSizePolicy>
+#include <QSpinBox>
 
 #include "rqt_human_radar/RadarScene.hpp"
 #include "rqt_human_radar/RadarCanvas.hpp"
@@ -33,7 +34,15 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
 : QWidget(parent), ui_(new Ui::RadarTabs()), node_(node)
 {
   ui_->setupUi(this);
-  ui_->radarCanvas = new RadarCanvas(this, ui_, node_);
+  RadarCanvas *radarCanvas = new RadarCanvas(this, ui_, node_);
+  ui_->radarCanvas = radarCanvas;
+
+  // Initial value of showFov
+  radarCanvas->showFov(ui_->fovCheckbox->isChecked());
+  radarCanvas->setFov(ui_->fov->value());
+  
+  // Initial value of showIDs
+  radarCanvas->showIds(ui_->idsCheckbox->isChecked());
 
   connect(
     ui_->settingsBtn, &QPushButton::clicked, [ = ]() {
@@ -54,6 +63,20 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
   connect(
     ui_->zoomOut, &QPushButton::clicked, [ = ]() {
       ui_->zoomLevel->setValue(ui_->zoomLevel->value() - ui_->zoomLevel->singleStep());
+    });
+
+  connect(
+    ui_->fovCheckbox, &QCheckBox::stateChanged, [ = ](int state) {
+      ui_->fov->setEnabled(state);
+      radarCanvas->showFov(state);
+    });
+  connect(
+    ui_->fov, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [ = ](int value) {
+      radarCanvas->setFov(value);
+    });
+  connect(
+    ui_->idsCheckbox, &QCheckBox::stateChanged, [ = ](int state) {
+      radarCanvas->showIds(state);
     });
 }
 

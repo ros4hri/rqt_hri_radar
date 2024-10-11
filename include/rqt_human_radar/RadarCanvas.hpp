@@ -90,7 +90,25 @@ public slots:
    * The preference is expressed in settings,
    * through a tick-box. Currently, person ID = <person_id>
    */
-  void showId();
+  void showIds(bool state) {
+    showIds_ = state;
+    update();
+  }
+
+  /**
+   * @brief Reading the user preference about showing or not the field of view.
+   *
+   * The preference is expressed in settings.
+   */
+  void showFov(bool state) {
+    showFov_ = state;
+    update();
+  }
+
+  void setFov(int value) {
+    fov_ = value;
+    update();
+  }
 
   std::tuple<double, double> getOffset() const {
     return {xOffset_, yOffset_};
@@ -174,8 +192,6 @@ private:
 
   int arcsToDraw_;
 
-  Qt::CheckState showIdValue_;
-
   // Radar drawing components
   double xOffset_, yOffset_;
 
@@ -193,6 +209,11 @@ private:
   std::vector<std::string> persons_;
 
   std::vector<KbObjectWidget *> kbObjects_;
+
+
+  bool showFov_;
+  int fov_;
+  bool showIds_;
 };
 
 }  // namespace rqt_human_radar

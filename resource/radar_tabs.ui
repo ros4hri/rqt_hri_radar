@@ -63,23 +63,13 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="settingsBtn">
-        <property name="text">
-         <string>Settings</string>
-        </property>
-        <property name="icon">
-         <iconset theme="preferences-system">
-          <normaloff>.</normaloff>.</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="zoomOut">
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="zoom-out"/>
+         <iconset theme="zoom-out">
+          <normaloff>.</normaloff>.</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -111,7 +101,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="zoom-in"/>
+         <iconset theme="zoom-in">
+          <normaloff>.</normaloff>.</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -154,6 +145,17 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="settingsBtn">
+        <property name="text">
+         <string>Settings</string>
+        </property>
+        <property name="icon">
+         <iconset theme="preferences-system">
+          <normaloff>.</normaloff>.</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -188,7 +190,7 @@
      <widget class="QWidget" name="settingsPage">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="refFrameLayout">
          <item>
           <widget class="QLabel" name="refFrameLabel">
            <property name="font">
@@ -197,7 +199,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Reference frame:</string>
+            <string>reference frame:</string>
            </property>
           </widget>
          </item>
@@ -219,10 +221,10 @@
             </size>
            </property>
            <property name="currentText">
-            <string>sellion_link</string>
+            <string>base_link</string>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <item>
             <property name="text">
@@ -244,7 +246,7 @@
          <item>
           <widget class="QPushButton" name="reloadButton">
            <property name="text">
-            <string>refresh frame list</string>
+            <string>get available frames</string>
            </property>
            <property name="icon">
             <iconset theme="reload">
@@ -268,7 +270,57 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="idCheckbox">
+        <layout class="QHBoxLayout" name="fovLayout">
+         <item>
+          <widget class="QCheckBox" name="fovCheckbox">
+           <property name="text">
+            <string>show field of view:</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="fov">
+           <property name="minimum">
+            <number>30</number>
+           </property>
+           <property name="maximum">
+            <number>180</number>
+           </property>
+           <property name="singleStep">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>150</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="degLabel">
+           <property name="text">
+            <string>°</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="idsCheckbox">
          <property name="text">
           <string>show IDs</string>
          </property>
@@ -307,7 +359,7 @@
  <tabstops>
   <tabstop>refFrameComboBox</tabstop>
   <tabstop>reloadButton</tabstop>
-  <tabstop>idCheckbox</tabstop>
+  <tabstop>idsCheckbox</tabstop>
   <tabstop>doneSettingsBtn</tabstop>
   <tabstop>clearObjectsBtn</tabstop>
  </tabstops>

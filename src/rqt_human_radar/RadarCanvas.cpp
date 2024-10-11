@@ -97,9 +97,6 @@ RadarCanvas::RadarCanvas(
 
 
   connect(
-          ui_->idCheckbox, QOverload<int>::of(&QCheckBox::stateChanged), this,
-          &RadarCanvas::showId);
-  connect(
           ui_->reloadButton, &QPushButton::clicked, this,
           &RadarCanvas::updateFramesList);
 
@@ -189,8 +186,6 @@ RadarCanvas::RadarCanvas(
   // Setting to "" the name of the hovered person
   idClicked_ = "";
 
-  // Reading the value representing whether we should display people ids or not
-  showIdValue_ = ui_->idCheckbox->checkState();
 
   // Setting callbacks for new/removed persons
   hriListener_->onTrackedPerson(
@@ -316,6 +311,15 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
     }
   }
 
+  if (showFov_) {
+    // Drawing the field of view
+    painter.setPen(QPen(Qt::transparent));
+    painter.setBrush(QBrush(QColor(255,0,0,20)));
+
+    double radius = pixelPerMeter_ * 3.5;
+    painter.drawPie(xOffset_ - radius, yOffset_ - radius, radius * 2, radius * 2, (- fov_/2) * 16, fov_ * 16);
+  }
+
   painter.setBrush(QBrush(Qt::transparent));
   painter.setPen(QPen(Qt::black));
 
@@ -429,7 +433,7 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
         // radar settings
         // Showing people distance when clicking on them
         QString identificator = QString::fromStdString(id);
-        if (showIdValue_ == Qt::Checked) {
+        if (showIds_) {
           painter.drawText(bottomRightCorner, identificator);
         }
         if (idClicked_ == id) {
@@ -465,13 +469,6 @@ void RadarCanvas::resizeEvent([[maybe_unused]] QResizeEvent * event)
     widget->reposition();
   }
 
-}
-
-
-void RadarCanvas::showId()
-{
-  showIdValue_ = ui_->idCheckbox->checkState();
-  update();
 }
 
 void RadarCanvas::mousePressEvent(QMouseEvent * event)
