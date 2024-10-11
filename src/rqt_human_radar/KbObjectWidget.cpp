@@ -43,11 +43,13 @@ namespace rqt_human_radar
 {
 
 KbObjectWidget::KbObjectWidget(
+        const std::string &name,
         const std::string &classname,
         const QString &file,
         rclcpp::Node::SharedPtr node,
         QWidget *parent)
     : QSvgWidget(file, parent), 
+        name_(name),
         classname_(classname),
         node_(node),
         tf_broadcaster_(node)
@@ -59,7 +61,7 @@ KbObjectWidget::KbObjectWidget(
   kb_add_pub_ = node_->create_publisher<std_msgs::msg::String>("/kb/add_fact", 10);
   kb_remove_pub_ = node_->create_publisher<std_msgs::msg::String>("/kb/remove_fact", 10);
 
-  id_ = classname_ + "_" + generateRandomSuffix();
+  id_ = name_ + "_" + generateRandomSuffix();
   // convert the id to lowercase
   std::transform(id_.begin(), id_.end(), id_.begin(),
     [](unsigned char c){ return std::tolower(c); });

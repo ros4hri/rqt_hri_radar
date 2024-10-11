@@ -32,6 +32,7 @@ class KbObjectWidget : public QSvgWidget {
     Q_OBJECT
 public:
   KbObjectWidget(
+        const std::string &name,
         const std::string &classname,
         const QString &file,
         rclcpp::Node::SharedPtr,
@@ -64,6 +65,7 @@ protected:
 private:
   void broadcastTransform();
 
+  std::string name_;
   std::string classname_;
   std::string id_;
   rclcpp::Node::SharedPtr node_;

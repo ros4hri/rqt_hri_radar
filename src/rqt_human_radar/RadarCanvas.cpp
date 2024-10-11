@@ -502,9 +502,13 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
 
     // (user-facing name, OWL class name, icon path)
     const std::vector<std::tuple<std::string, std::string, std::string>> OBJECTS 
-        {{ "book", "Book", package_ + "/res/icons/book-open-variant.svg" },
-        { "cup", "Cup", package_ + "/res/icons/cup-water.svg" },
-        { "phone", "Phone", package_ + "/res/icons/cellphone.svg" }};
+        {
+        { "book", "oro:Book", package_ + "/res/icons/book-open-variant.svg" },
+        { "cup", "oro:Cup", package_ + "/res/icons/cup-water.svg" },
+        { "phone", "cyc:CellularTelephone", package_ + "/res/icons/cellphone.svg" },
+        { "apple", "dbr:Apple", package_ + "/res/icons/food-apple.svg" },
+        { "pear", "dbr:Pear", package_ + "/res/icons/food-pear.svg" },
+        };
 
     for (const auto & object : OBJECTS) {
         std::string name, classname, icon;
@@ -513,8 +517,8 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
         auto action = new QAction(QIcon(icon.c_str()), 
                                    ("Place a " + name).c_str(), 
                                     this);
-        connect(action, &QAction::triggered, this, [classname, icon, this]() {
-            createKbObjectWidget(classname, icon);
+        connect(action, &QAction::triggered, this, [name, classname, icon, this]() {
+            createKbObjectWidget(name, classname, icon);
         });
         contextMenu.addAction(action);
     }
@@ -522,8 +526,11 @@ void RadarCanvas::showContextMenu(const QPoint &pos) {
     contextMenu.exec(mapToGlobal(pos));
 }
 
-void RadarCanvas::createKbObjectWidget(const std::string &classname, const std::string &path) {
-    KbObjectWidget *imageWidget = new KbObjectWidget(classname, 
+void RadarCanvas::createKbObjectWidget(const std::string &name, 
+                                       const std::string &classname, 
+                                       const std::string &path) {
+    KbObjectWidget *imageWidget = new KbObjectWidget(name, 
+                                                     classname, 
                                                      QString::fromStdString(path), 
                                                      node_, 
                                                      this);
