@@ -123,7 +123,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="simHelpLabel">
         <property name="font">
          <font>
           <italic>true</italic>
@@ -320,14 +320,25 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="idsCheckbox">
-         <property name="text">
-          <string>show IDs</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QCheckBox" name="idsCheckbox">
+           <property name="text">
+            <string>show IDs</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="objectsSimCheckbox">
+           <property name="text">
+            <string>enable objects simulation</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer">
@@ -359,7 +370,6 @@
  <tabstops>
   <tabstop>refFrameComboBox</tabstop>
   <tabstop>reloadButton</tabstop>
-  <tabstop>idsCheckbox</tabstop>
   <tabstop>doneSettingsBtn</tabstop>
   <tabstop>clearObjectsBtn</tabstop>
  </tabstops>

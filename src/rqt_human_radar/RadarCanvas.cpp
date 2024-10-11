@@ -225,6 +225,20 @@ bool RadarCanvas::isInFov(const QPoint & point) const
   return (angle >= -fov_ / 2) && (angle <= fov_ / 2);
 }
 
+void RadarCanvas::enableSimulation(bool state)
+{
+  simulationEnabled_ = state;
+
+  if (state) {
+    setContextMenuPolicy(Qt::CustomContextMenu);
+  } else {
+    setContextMenuPolicy(Qt::NoContextMenu);
+    for (auto & widget : kbObjects_) {
+      widget->deleteLater();
+    }
+  }
+}
+
 void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 {
   QPainter painter(this);

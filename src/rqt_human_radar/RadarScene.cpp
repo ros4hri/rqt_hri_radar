@@ -34,8 +34,20 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
 : QWidget(parent), ui_(new Ui::RadarTabs()), node_(node)
 {
   ui_->setupUi(this);
+
   RadarCanvas * radarCanvas = new RadarCanvas(this, ui_, node_);
   ui_->radarCanvas = radarCanvas;
+
+  if (ui_->objectsSimCheckbox->isChecked()) {
+    ui_->simHelpLabel->show();
+    ui_->clearObjectsBtn->show();
+    radarCanvas->enableSimulation(true);
+  } else {
+    ui_->simHelpLabel->hide();
+    ui_->clearObjectsBtn->hide();
+    radarCanvas->enableSimulation(false);
+  }
+
 
   // Initial value of showFov
   radarCanvas->showFov(ui_->fovCheckbox->isChecked());
@@ -74,9 +86,22 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
     ui_->fov, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [ = ](int value) {
       radarCanvas->setFov(value);
     });
+
   connect(
     ui_->idsCheckbox, &QCheckBox::stateChanged, [ = ](int state) {
       radarCanvas->showIds(state);
+    });
+
+  connect(
+    ui_->objectsSimCheckbox, &QCheckBox::stateChanged, [ = ](int state) {
+      radarCanvas->enableSimulation(state);
+      if (state) {
+        ui_->simHelpLabel->show();
+        ui_->clearObjectsBtn->show();
+      } else {
+        ui_->simHelpLabel->hide();
+        ui_->clearObjectsBtn->hide();
+      }
     });
 }
 

@@ -144,6 +144,8 @@ public slots:
 
   bool isInFov(const QPoint & pos) const;
 
+  void enableSimulation(bool state);
+
 protected:
   /**
    * @brief overriding the paintEvent virtual function.
@@ -235,6 +237,7 @@ private:
   bool showFov_;
   int fov_;
   bool showIds_;
+  bool simulationEnabled_;
 };
 
 }  // namespace rqt_human_radar
