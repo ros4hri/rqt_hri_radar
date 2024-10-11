@@ -209,6 +209,18 @@ void RadarCanvas::onTrackedPersonLost(hri::ID id)
   persons_.erase(person);
 }
 
+bool RadarCanvas::isInFov(const QPoint & point) const
+{
+
+  if (!showFov_) {
+    return false;
+  }
+
+  double angle = std::atan2(point.y() - yOffset_, point.x() - xOffset_);
+  angle = angle * 180 / M_PI;
+  return (angle >= -fov_/2) && (angle <= fov_/2);
+}
+
 void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 {
   QPainter painter(this);

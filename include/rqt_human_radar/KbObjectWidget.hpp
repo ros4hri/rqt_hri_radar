@@ -41,18 +41,6 @@ public:
 
 
   /**
-   * @brief Set the (x,y) position of the object in real world coordinates.
-   *
-   * @param x x coordinate in meters
-   * @param y y coordinate in meters
-   */
-  void place(double x, double y);
-
-  void reposition() {
-    place(x_, y_);
-  }
-
-  /**
    * @brief Set the (x,y) position of the object in pixels.
    *
    * @param x x coordinate in pixels
@@ -60,13 +48,20 @@ public:
    */
   void pxPlace(const QPoint &);
 
+  /** 
+   * Recompute the meter 2 pixel mapping and update the (pixel) position
+   * of the widget.
+   */
+  void reposition();
+
+  void updateKbVisibility() const;
+
 protected:
   void mousePressEvent(QMouseEvent *event) override;
   void showContextMenu(const QPoint &);
   void resizeEvent(QResizeEvent *) override;
 
 private:
-
   void broadcastTransform();
 
   std::string classname_;
@@ -84,7 +79,11 @@ private:
   // Reference frame
   std::optional<std::string> referenceFrame_;
 
-  double x_, y_;
+  double x_ = 0., y_ = 0.;
+
+  // flag used at destruction time to clear
+  // facts in the knowledge base
+  bool toBeDeleted_ = false;
 };
 
 }  // namespace rqt_human_radar

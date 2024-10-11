@@ -105,9 +105,21 @@ public slots:
     update();
   }
 
+  bool hasFov() const {
+    return showFov_;
+
+    for (auto & widget : kbObjects_) {
+        widget->updateKbVisibility();
+    }
+  }
+
   void setFov(int value) {
     fov_ = value;
     update();
+
+    for (auto & widget : kbObjects_) {
+        widget->updateKbVisibility();
+    }
   }
 
   std::tuple<double, double> getOffset() const {
@@ -121,6 +133,8 @@ public slots:
   std::optional<std::string> getReferenceFrame() const {
     return referenceFrame_;
   }
+
+  bool isInFov(const QPoint & pos) const;
 
 protected:
   /**

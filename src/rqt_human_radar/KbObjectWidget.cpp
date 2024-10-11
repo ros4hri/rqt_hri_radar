@@ -77,10 +77,16 @@ KbObjectWidget::KbObjectWidget(
 }
 
 KbObjectWidget::~KbObjectWidget() {
+
+    toBeDeleted_ = true;
+
+    updateKbVisibility();
+
     std_msgs::msg::String msg;
     msg.data = id_ + " rdf:type " + classname_;
 
     kb_remove_pub_->publish(msg);
+
 }
 
 void KbObjectWidget::showContextMenu(const QPoint &pos) {
@@ -96,16 +102,33 @@ void KbObjectWidget::showContextMenu(const QPoint &pos) {
     contextMenu.exec(mapToGlobal(pos));
 }
 
-void KbObjectWidget::place(double x, double y) {
-    x_ = x;
-    y_ = y;
+void KbObjectWidget::reposition() {
 
     RadarCanvas *canvas = qobject_cast<RadarCanvas *>(parent());
 
     auto [xOffset, yOffset] = canvas->getOffset();
     int pixelPerMeter = canvas->getPixelPerMeter();
 
-    move(QPoint(xOffset + x * pixelPerMeter, yOffset - y * pixelPerMeter) - rect().center());
+    move(QPoint(xOffset + x_ * pixelPerMeter, yOffset - y_ * pixelPerMeter) - rect().center());
+
+}
+
+void KbObjectWidget::updateKbVisibility() const {
+
+    RadarCanvas *canvas = qobject_cast<RadarCanvas *>(parent());
+
+    if (!canvas->hasFov()) return;
+
+    bool inFov = canvas->isInFov(mapToParent(rect().center()));
+
+    std_msgs::msg::String msg;
+    msg.data = "myself oro:sees " + id_;
+
+    if (inFov && !toBeDeleted_) {
+        kb_add_pub_->publish(msg);
+    } else {
+        kb_remove_pub_->publish(msg);
+    }
 }
 
 void KbObjectWidget::pxPlace(const QPoint &pos) {
@@ -114,15 +137,22 @@ void KbObjectWidget::pxPlace(const QPoint &pos) {
     auto [xOffset, yOffset] = canvas->getOffset();
     int pixelPerMeter = canvas->getPixelPerMeter();
 
-    x_ = (pos.x() - xOffset) / double(pixelPerMeter);
-    y_ = (yOffset - pos.y()) / double(pixelPerMeter);
+    auto x = (pos.x() - xOffset) / double(pixelPerMeter);
+    auto y = (yOffset - pos.y()) / double(pixelPerMeter);
 
-    place(x_, y_);
+
+    if ((abs(x_ - x) > 1e-4) || (abs(y_ - y) < 1e-4)) {
+        x_ = x;
+        y_ = y;
+
+        reposition();
+        updateKbVisibility();
+    }
 }
 
 void KbObjectWidget::resizeEvent([[maybe_unused]] QResizeEvent * event)
 {
-    place(x_, y_);
+    reposition();
 }
 
 void KbObjectWidget::mousePressEvent(QMouseEvent *event) {
