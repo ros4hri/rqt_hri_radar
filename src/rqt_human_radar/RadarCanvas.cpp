@@ -34,6 +34,7 @@
 #include <QTransform>
 #include <QVector>
 
+#include <chrono>
 #include <cmath>
 #include <functional>
 #include <sstream>
@@ -44,6 +45,8 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <hri_msgs/msg/ids_list.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>  // For transforming geometry_msgs types
+
+using namespace std::chrono_literals;
 
 std::vector<double> SPECIAL_ANGLES = {0, 30, 60, 90, 120, 150, 180};
 const double SVG_SIZE_RATIO = 1.4857;
@@ -355,7 +358,7 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
       try {
         personTrans = tfBuffer_->lookupTransform(
           *referenceFrame_, personFrame, rclcpp::Time(0),
-          rclcpp::Duration(1, 0));   // 1-second timeout;
+          rclcpp::Duration(std::chrono::nanoseconds(10ms)));
         tf2::doTransform(versor_, rotatedVersor, personTrans);
 
         double distance =
