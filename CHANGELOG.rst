@@ -2,6 +2,28 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* make simulation of objects a setting (off by default)
+* do not block 1s when frame is not found
+* linting
+* add apple and pear as additonal objects, fix OWL classes
+* update the knowledge base with seen/unseen objects
+* add option to show the robot's field of view + corresponding settings
+  While here, minor refactor of the 'show ids' btn
+* make sure the robot icon zooms in and out properly
+  + update ARI's icon so that sellion_link is ~at origin
+* add a zoom slider to the UI
+* ensure the dropped objects are accurately placed + follow resize
+* broadcast the position of dropped objects as TF frames
+* publish to the knowledge base when new objects are added/removed
+* add support to delete dropped objects by right-clicking on them
+* Add 'clear objects' btn
+  This reverts commit 7e5330cc442631595e2d7948a5fbc429958ae7f6.
+* WIP to place objects in front of the robot
+* import a bunch of icons for various objects
+* Contributors: Séverin Lemaignan
+
 2.0.0 (2024-10-10)
 ------------------
 * remove 'clear objects' btn, as not needed in basic 'radar' mode
