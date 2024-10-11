@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.0 (2024-10-11)
+------------------
 * make simulation of objects a setting (off by default)
 * do not block 1s when frame is not found
 * linting
