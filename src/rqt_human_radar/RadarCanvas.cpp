@@ -80,48 +80,50 @@ RadarCanvas::RadarCanvas(
   this->ui_ = ui;
 
   setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(this, &RadarCanvas::customContextMenuRequested, this,
-          &RadarCanvas::showContextMenu);
+  connect(
+    this, &RadarCanvas::customContextMenuRequested, this,
+    &RadarCanvas::showContextMenu);
 
   connect(
-          ui_->zoomLevel, &QSlider::valueChanged, [this](int value) {
+    ui_->zoomLevel, &QSlider::valueChanged, [this](int value) {
+      pixelPerMeter_ = value;
+      updateArcsToDraw();
+      update();
 
-            pixelPerMeter_ = value;
-            updateArcsToDraw();
-            update();
-
-            for (auto & widget : kbObjects_) {
-                widget->reposition();
-            }
-        });
+      for (auto & widget : kbObjects_) {
+        widget->reposition();
+      }
+    });
 
 
   connect(
-          ui_->reloadButton, &QPushButton::clicked, this,
-          &RadarCanvas::updateFramesList);
+    ui_->reloadButton, &QPushButton::clicked, this,
+    &RadarCanvas::updateFramesList);
 
   QString currentFrameSet = ui_->refFrameComboBox->currentText();
   if (!currentFrameSet.isEmpty()) {
-      RCLCPP_INFO(node_->get_logger(), "Current frame set: %s", currentFrameSet.toStdString().c_str());
-      referenceFrame_ = currentFrameSet.toStdString();
+    RCLCPP_INFO(
+      node_->get_logger(), "Current frame set: %s",
+      currentFrameSet.toStdString().c_str());
+    referenceFrame_ = currentFrameSet.toStdString();
   }
   connect(
-          ui_->refFrameComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-          [this](int index) {
-            QString frame = ui_->refFrameComboBox->itemText(index);
-            if (!frame.isEmpty()) {
-              RCLCPP_INFO(node_->get_logger(), "Current frame set: %s", frame.toStdString().c_str());
-              referenceFrame_ = frame.toStdString();
-            }
-          });
+    ui_->refFrameComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+    [this](int index) {
+      QString frame = ui_->refFrameComboBox->itemText(index);
+      if (!frame.isEmpty()) {
+        RCLCPP_INFO(node_->get_logger(), "Current frame set: %s", frame.toStdString().c_str());
+        referenceFrame_ = frame.toStdString();
+      }
+    });
 
-   connect(
-           ui_->clearObjectsBtn, &QPushButton::clicked, [this]() {
-               for (auto & widget : kbObjects_) {
-                   widget->deleteLater();
-               }
-               kbObjects_.clear();
-           });
+  connect(
+    ui_->clearObjectsBtn, &QPushButton::clicked, [this]() {
+      for (auto & widget : kbObjects_) {
+        widget->deleteLater();
+      }
+      kbObjects_.clear();
+    });
 
   // Retrieving robot and person icons
   try {
@@ -211,14 +213,13 @@ void RadarCanvas::onTrackedPersonLost(hri::ID id)
 
 bool RadarCanvas::isInFov(const QPoint & point) const
 {
-
   if (!showFov_) {
     return false;
   }
 
   double angle = std::atan2(point.y() - yOffset_, point.x() - xOffset_);
   angle = angle * 180 / M_PI;
-  return (angle >= -fov_/2) && (angle <= fov_/2);
+  return (angle >= -fov_ / 2) && (angle <= fov_ / 2);
 }
 
 void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
@@ -326,10 +327,12 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
   if (showFov_) {
     // Drawing the field of view
     painter.setPen(QPen(Qt::transparent));
-    painter.setBrush(QBrush(QColor(255,0,0,20)));
+    painter.setBrush(QBrush(QColor(255, 0, 0, 20)));
 
     double radius = pixelPerMeter_ * 3.5;
-    painter.drawPie(xOffset_ - radius, yOffset_ - radius, radius * 2, radius * 2, (- fov_/2) * 16, fov_ * 16);
+    painter.drawPie(
+      xOffset_ - radius, yOffset_ - radius, radius * 2, radius * 2, (-fov_ / 2) * 16,
+      fov_ * 16);
   }
 
   painter.setBrush(QBrush(Qt::transparent));
@@ -466,8 +469,8 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
   double robotPxSize = 1. * pixelPerMeter_;
   painter.drawImage(
     QRectF(
-      QPointF(xOffset_ - robotPxSize/2, yOffset_ - robotPxSize/2),
-      QPointF(xOffset_ + robotPxSize/2, yOffset_ + robotPxSize/2)),
+      QPointF(xOffset_ - robotPxSize / 2, yOffset_ - robotPxSize / 2),
+      QPointF(xOffset_ + robotPxSize / 2, yOffset_ + robotPxSize / 2)),
     robotImage_);
 }
 
@@ -480,7 +483,6 @@ void RadarCanvas::resizeEvent([[maybe_unused]] QResizeEvent * event)
   for (auto & widget : kbObjects_) {
     widget->reposition();
   }
-
 }
 
 void RadarCanvas::mousePressEvent(QMouseEvent * event)
@@ -496,69 +498,75 @@ void RadarCanvas::mousePressEvent(QMouseEvent * event)
   }
 }
 
-void RadarCanvas::showContextMenu(const QPoint &pos) {
+void RadarCanvas::showContextMenu(const QPoint & pos)
+{
+  QMenu contextMenu("Add objects", this);
 
-    QMenu contextMenu("Add objects", this);
+  // (user-facing name, OWL class name, icon path)
+  const std::vector<std::tuple<std::string, std::string, std::string>> OBJECTS
+  {
+    {"book", "oro:Book", package_ + "/res/icons/book-open-variant.svg"},
+    {"cup", "oro:Cup", package_ + "/res/icons/cup-water.svg"},
+    {"phone", "cyc:CellularTelephone", package_ + "/res/icons/cellphone.svg"},
+    {"apple", "dbr:Apple", package_ + "/res/icons/food-apple.svg"},
+    {"pear", "dbr:Pear", package_ + "/res/icons/food-pear.svg"},
+  };
 
-    // (user-facing name, OWL class name, icon path)
-    const std::vector<std::tuple<std::string, std::string, std::string>> OBJECTS 
-        {
-        { "book", "oro:Book", package_ + "/res/icons/book-open-variant.svg" },
-        { "cup", "oro:Cup", package_ + "/res/icons/cup-water.svg" },
-        { "phone", "cyc:CellularTelephone", package_ + "/res/icons/cellphone.svg" },
-        { "apple", "dbr:Apple", package_ + "/res/icons/food-apple.svg" },
-        { "pear", "dbr:Pear", package_ + "/res/icons/food-pear.svg" },
-        };
+  for (const auto & object : OBJECTS) {
+    std::string name, classname, icon;
+    std::tie(name, classname, icon) = object;
 
-    for (const auto & object : OBJECTS) {
-        std::string name, classname, icon;
-        std::tie(name, classname, icon) = object;
+    auto action = new QAction(
+      QIcon(icon.c_str()),
+      ("Place a " + name).c_str(),
+      this);
+    connect(
+      action, &QAction::triggered, this, [name, classname, icon, this]() {
+        createKbObjectWidget(name, classname, icon);
+      });
+    contextMenu.addAction(action);
+  }
 
-        auto action = new QAction(QIcon(icon.c_str()), 
-                                   ("Place a " + name).c_str(), 
-                                    this);
-        connect(action, &QAction::triggered, this, [name, classname, icon, this]() {
-            createKbObjectWidget(name, classname, icon);
-        });
-        contextMenu.addAction(action);
-    }
-
-    contextMenu.exec(mapToGlobal(pos));
+  contextMenu.exec(mapToGlobal(pos));
 }
 
-void RadarCanvas::createKbObjectWidget(const std::string &name, 
-                                       const std::string &classname, 
-                                       const std::string &path) {
-    KbObjectWidget *imageWidget = new KbObjectWidget(name, 
-                                                     classname, 
-                                                     QString::fromStdString(path), 
-                                                     node_, 
-                                                     this);
-    kbObjects_.push_back(imageWidget);
-    imageWidget->pxPlace(mapFromGlobal(QCursor::pos()));
-    imageWidget->show();
-
+void RadarCanvas::createKbObjectWidget(
+  const std::string & name,
+  const std::string & classname,
+  const std::string & path)
+{
+  KbObjectWidget * imageWidget = new KbObjectWidget(
+    name,
+    classname,
+    QString::fromStdString(path),
+    node_,
+    this);
+  kbObjects_.push_back(imageWidget);
+  imageWidget->pxPlace(mapFromGlobal(QCursor::pos()));
+  imageWidget->show();
 }
 
-void RadarCanvas::dragEnterEvent(QDragEnterEvent *event) {
+void RadarCanvas::dragEnterEvent(QDragEnterEvent * event)
+{
+  event->acceptProposedAction();
+}
+
+void RadarCanvas::dragMoveEvent(QDragMoveEvent * event)
+{
+  // Accept the drag move if it stays within the widget bounds
+  if (rect().contains(event->pos())) {
     event->acceptProposedAction();
+  }
 }
 
-void RadarCanvas::dragMoveEvent(QDragMoveEvent *event) {
-    // Accept the drag move if it stays within the widget bounds
-    if (rect().contains(event->pos())) {
-        event->acceptProposedAction();
-    }
-}
-
-void RadarCanvas::dropEvent(QDropEvent *event) {
-    if (event->source()) {
-
-        KbObjectWidget *draggedWidget = qobject_cast<KbObjectWidget *>(event->source());
-        draggedWidget->pxPlace(event->pos());
-        draggedWidget->show();
-        event->acceptProposedAction();
-    }
+void RadarCanvas::dropEvent(QDropEvent * event)
+{
+  if (event->source()) {
+    KbObjectWidget * draggedWidget = qobject_cast<KbObjectWidget *>(event->source());
+    draggedWidget->pxPlace(event->pos());
+    draggedWidget->show();
+    event->acceptProposedAction();
+  }
 }
 
 bool RadarCanvas::inScreen(double & x, double & y) const

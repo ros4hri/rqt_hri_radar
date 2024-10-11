@@ -45,6 +45,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <hri/hri.hpp>
@@ -90,7 +91,8 @@ public slots:
    * The preference is expressed in settings,
    * through a tick-box. Currently, person ID = <person_id>
    */
-  void showIds(bool state) {
+  void showIds(bool state)
+  {
     showIds_ = state;
     update();
   }
@@ -100,37 +102,43 @@ public slots:
    *
    * The preference is expressed in settings.
    */
-  void showFov(bool state) {
+  void showFov(bool state)
+  {
     showFov_ = state;
     update();
   }
 
-  bool hasFov() const {
+  bool hasFov() const
+  {
     return showFov_;
 
     for (auto & widget : kbObjects_) {
-        widget->updateKbVisibility();
+      widget->updateKbVisibility();
     }
   }
 
-  void setFov(int value) {
+  void setFov(int value)
+  {
     fov_ = value;
     update();
 
     for (auto & widget : kbObjects_) {
-        widget->updateKbVisibility();
+      widget->updateKbVisibility();
     }
   }
 
-  std::tuple<double, double> getOffset() const {
+  std::tuple<double, double> getOffset() const
+  {
     return {xOffset_, yOffset_};
   }
 
-  int getPixelPerMeter() const {
+  int getPixelPerMeter() const
+  {
     return pixelPerMeter_;
   }
 
-  std::optional<std::string> getReferenceFrame() const {
+  std::optional<std::string> getReferenceFrame() const
+  {
     return referenceFrame_;
   }
 
@@ -159,13 +167,12 @@ protected:
   void mousePressEvent(QMouseEvent * event) override;
 
 private:
-
   void showContextMenu(const QPoint &);
   void createKbObjectWidget(const std::string &, const std::string &, const std::string &);
 
-  void dragEnterEvent(QDragEnterEvent *event) override;
-  void dragMoveEvent(QDragMoveEvent *event) override;
-  void dropEvent(QDropEvent *event) override;
+  void dragEnterEvent(QDragEnterEvent * event) override;
+  void dragMoveEvent(QDragMoveEvent * event) override;
+  void dropEvent(QDropEvent * event) override;
 
   /**
    * @brief returns whether or not a point is inside the canvas.

@@ -15,28 +15,32 @@
 #ifndef RQT_HUMAN_RADAR__KBOBJECTWIDGET_HPP_
 #define RQT_HUMAN_RADAR__KBOBJECTWIDGET_HPP_
 
-#include <memory>
-#include <string>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <QTimer>
 #include <QSvgWidget>
 
+#include <memory>
+#include <string>
+
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <tf2_ros/transform_broadcaster.h>
 
-namespace rqt_human_radar 
+
+namespace rqt_human_radar
 {
 
-class KbObjectWidget : public QSvgWidget {
-    Q_OBJECT
+class KbObjectWidget : public QSvgWidget
+{
+  Q_OBJECT
+
 public:
   KbObjectWidget(
-        const std::string &name,
-        const std::string &classname,
-        const QString &file,
-        rclcpp::Node::SharedPtr,
-        QWidget *parent = nullptr);
+    const std::string & name,
+    const std::string & classname,
+    const QString & file,
+    rclcpp::Node::SharedPtr,
+    QWidget * parent = nullptr);
 
   ~KbObjectWidget();
 
@@ -49,7 +53,7 @@ public:
    */
   void pxPlace(const QPoint &);
 
-  /** 
+  /**
    * Recompute the meter 2 pixel mapping and update the (pixel) position
    * of the widget.
    */
@@ -58,7 +62,7 @@ public:
   void updateKbVisibility() const;
 
 protected:
-  void mousePressEvent(QMouseEvent *event) override;
+  void mousePressEvent(QMouseEvent * event) override;
   void showContextMenu(const QPoint &);
   void resizeEvent(QResizeEvent *) override;
 
@@ -75,7 +79,7 @@ private:
 
   tf2_ros::TransformBroadcaster tf_broadcaster_;
 
-  QTimer *timer_;
+  QTimer * timer_;
   int pixelPerMeter_;
 
   // Reference frame

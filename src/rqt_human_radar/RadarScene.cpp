@@ -34,13 +34,13 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
 : QWidget(parent), ui_(new Ui::RadarTabs()), node_(node)
 {
   ui_->setupUi(this);
-  RadarCanvas *radarCanvas = new RadarCanvas(this, ui_, node_);
+  RadarCanvas * radarCanvas = new RadarCanvas(this, ui_, node_);
   ui_->radarCanvas = radarCanvas;
 
   // Initial value of showFov
   radarCanvas->showFov(ui_->fovCheckbox->isChecked());
   radarCanvas->setFov(ui_->fov->value());
-  
+
   // Initial value of showIDs
   radarCanvas->showIds(ui_->idsCheckbox->isChecked());
 
