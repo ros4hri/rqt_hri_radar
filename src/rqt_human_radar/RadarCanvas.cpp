@@ -131,7 +131,7 @@ RadarCanvas::RadarCanvas(
   // Retrieving robot and person icons
   try {
     package_ = ament_index_cpp::get_package_share_directory("rqt_human_radar");
-    robotImageFile_ = package_ + "/res/ari.svg";
+    robotImageFile_ = package_ + "/res/tiagopro.svg";
     personSvgFile_ = package_ + "/res/adult_standing_disengaging.svg";
   } catch (const std::exception & e) {
     RCLCPP_ERROR(
