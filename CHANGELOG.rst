@@ -2,6 +2,12 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* properly scale the robot and humans icons
+* use TIAGo Pro head instead of ARI
+* Contributors: Séverin Lemaignan
+
 2.1.0 (2024-10-11)
 ------------------
 * make simulation of objects a setting (off by default)
