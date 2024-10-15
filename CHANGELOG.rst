@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2024-10-15)
+------------------
 * properly scale the robot and humans icons
 * use TIAGo Pro head instead of ARI
 * Contributors: Séverin Lemaignan
