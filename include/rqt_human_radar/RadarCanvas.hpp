@@ -203,13 +203,10 @@ private:
 
   // Stores the image being drawn
   QImage robotImage_;
+  QImage humanIcon_;
   bool robotImageFound, personImageFound;
   std::string package_, robotImageFile_, personSvgFile_;
   std::map<std::string, QPolygon> peoplePosition_;
-
-  // Svg renderer
-  QSvgRenderer svgRenderer_;
-  bool svgRendererInitialized_;
 
   int pixelPerMeter_;
 

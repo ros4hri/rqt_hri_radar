@@ -41,17 +41,16 @@
 
 #include "./ui_radar_tabs.h"
 
-
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <hri_msgs/msg/ids_list.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>  // For transforming geometry_msgs types
 
+
 using namespace std::chrono_literals;
 
 std::vector<double> SPECIAL_ANGLES = {0, 30, 60, 90, 120, 150, 180};
-const double SVG_SIZE_RATIO = 1.4857;
-const double SVG_PERSON_WIDTH = 70;
-
+const double ROBOT_SIZE = .15;   // physical size (in m) of the robot along its x-axis
+const double HUMAN_SIZE = .30;   // physical size (in m) of the human along its x-axis
 
 namespace rqt_human_radar
 {
@@ -98,7 +97,6 @@ RadarCanvas::RadarCanvas(
       }
     });
 
-
   connect(
     ui_->reloadButton, &QPushButton::clicked, this,
     &RadarCanvas::updateFramesList);
@@ -111,11 +109,14 @@ RadarCanvas::RadarCanvas(
     referenceFrame_ = currentFrameSet.toStdString();
   }
   connect(
-    ui_->refFrameComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+    ui_->refFrameComboBox,
+    QOverload<int>::of(&QComboBox::currentIndexChanged),
     [this](int index) {
       QString frame = ui_->refFrameComboBox->itemText(index);
       if (!frame.isEmpty()) {
-        RCLCPP_INFO(node_->get_logger(), "Current frame set: %s", frame.toStdString().c_str());
+        RCLCPP_INFO(
+          node_->get_logger(), "Current frame set: %s",
+          frame.toStdString().c_str());
         referenceFrame_ = frame.toStdString();
       }
     });
@@ -143,14 +144,14 @@ RadarCanvas::RadarCanvas(
 
   robotImageFound = robotImage_.load(QString::fromStdString(robotImageFile_));
 
-  svgRendererInitialized_ =
-    svgRenderer_.load(QString::fromStdString(personSvgFile_));
+  personImageFound =
+    humanIcon_.load(QString::fromStdString(personSvgFile_));
 
   if (!robotImageFound) {
     RCLCPP_WARN(node_->get_logger(), "Robot icon not found");
   }
 
-  if (!svgRendererInitialized_) {
+  if (!personImageFound) {
     RCLCPP_WARN(node_->get_logger(), "Person icon not found");
   }
 
@@ -191,12 +192,13 @@ RadarCanvas::RadarCanvas(
   // Setting to "" the name of the hovered person
   idClicked_ = "";
 
-
   // Setting callbacks for new/removed persons
   hriListener_->onTrackedPerson(
     std::bind(&RadarCanvas::onTrackedPerson, this, std::placeholders::_1));
   hriListener_->onTrackedPersonLost(
-    std::bind(&RadarCanvas::onTrackedPersonLost, this, std::placeholders::_1));
+    std::bind(
+      &RadarCanvas::onTrackedPersonLost,
+      this, std::placeholders::_1));
 
   update();
 }
@@ -241,6 +243,12 @@ void RadarCanvas::enableSimulation(bool state)
 
 void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 {
+  double humanWidth = HUMAN_SIZE * pixelPerMeter_;
+  double humanHeight = humanWidth * humanIcon_.height() / humanIcon_.width();
+
+  double robotWidth = ROBOT_SIZE * pixelPerMeter_;
+  double robotHeight = robotWidth * robotImage_.height() / robotImage_.width();
+
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
   font_ = painter.font();
@@ -296,7 +304,8 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
         painter.drawText(
           QPointF(0, -2),
           QString::fromStdString(
-            std::to_string(static_cast<int>(std::round(angle * 180 / M_PI)) * -1) +
+            std::to_string(
+              static_cast<int>(std::round(angle * 180 / M_PI)) * -1) +
             "°"));
         painter.rotate(-angle * 180 / M_PI);
         painter.translate(-QPointF(xToPrint, yToPrint));
@@ -348,8 +357,8 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 
     double radius = pixelPerMeter_ * 3.5;
     painter.drawPie(
-      xOffset_ - radius, yOffset_ - radius, radius * 2, radius * 2, (-fov_ / 2) * 16,
-      fov_ * 16);
+      xOffset_ - radius, yOffset_ - radius, radius * 2,
+      radius * 2, (-fov_ / 2) * 16, fov_ * 16);
   }
 
   painter.setBrush(QBrush(Qt::transparent));
@@ -366,7 +375,6 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
     std::string personFrame = person.second->frame();
     versor_.header.frame_id = personFrame;
     geometry_msgs::msg::TransformStamped personTrans;
-
 
     if (referenceFrame_) {
       try {
@@ -392,13 +400,15 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
         // half of the width and height of the rectangle containing
         // the person's icon.
 
-        double rotatedWidthX = (SVG_PERSON_WIDTH / 2 * std::cos(theta));
-        double rotatedWidthY = (SVG_PERSON_WIDTH / 2 * -std::sin(theta));
+
+        double rotatedWidthX = (humanWidth / 2 * std::cos(theta));
+        double rotatedWidthY = (humanWidth / 2 * -std::sin(theta));
+
 
         double rotatedHeightX =
-          (SVG_PERSON_WIDTH / SVG_SIZE_RATIO / 2 * std::sin(theta));
+          (humanHeight / 2 * std::sin(theta));
         double rotatedHeightY =
-          (SVG_PERSON_WIDTH / SVG_SIZE_RATIO / 2 * std::cos(theta));
+          (humanHeight / 2 * std::cos(theta));
 
         // Computing vertices of the rotated rectangle
 
@@ -440,12 +450,13 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 
         painter.translate(topLeftCorner);
         painter.rotate(-(theta * 180) / M_PI);
-        svgRenderer_.render(
-          &painter,
+
+        painter.drawImage(
           QRectF(
-            QPointF(0, 0), QPointF(
-              SVG_PERSON_WIDTH,
-              SVG_PERSON_WIDTH / SVG_SIZE_RATIO)));
+            QPointF(-humanWidth / 2, -humanHeight / 2),
+            QPointF(humanWidth / 2, humanHeight / 2)),
+          humanIcon_);
+
         painter.rotate((theta * 180) / M_PI);
         painter.translate(-topLeftCorner);
 
@@ -483,11 +494,10 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
     }
   }
 
-  double robotPxSize = 1. * pixelPerMeter_;
   painter.drawImage(
     QRectF(
-      QPointF(xOffset_ - robotPxSize / 2, yOffset_ - robotPxSize / 2),
-      QPointF(xOffset_ + robotPxSize / 2, yOffset_ + robotPxSize / 2)),
+      QPointF(xOffset_ - robotWidth / 2, yOffset_ - robotHeight / 2),
+      QPointF(xOffset_ + robotWidth / 2, yOffset_ + robotHeight / 2)),
     robotImage_);
 }
 
@@ -520,8 +530,7 @@ void RadarCanvas::showContextMenu(const QPoint & pos)
   QMenu contextMenu("Add objects", this);
 
   // (user-facing name, OWL class name, icon path)
-  const std::vector<std::tuple<std::string, std::string, std::string>> OBJECTS
-  {
+  const std::vector<std::tuple<std::string, std::string, std::string>> OBJECTS{
     {"book", "oro:Book", package_ + "/res/icons/book-open-variant.svg"},
     {"cup", "oro:Cup", package_ + "/res/icons/cup-water.svg"},
     {"phone", "cyc:CellularTelephone", package_ + "/res/icons/cellphone.svg"},
@@ -533,10 +542,8 @@ void RadarCanvas::showContextMenu(const QPoint & pos)
     std::string name, classname, icon;
     std::tie(name, classname, icon) = object;
 
-    auto action = new QAction(
-      QIcon(icon.c_str()),
-      ("Place a " + name).c_str(),
-      this);
+    auto action =
+      new QAction(QIcon(icon.c_str()), ("Place a " + name).c_str(), this);
     connect(
       action, &QAction::triggered, this, [name, classname, icon, this]() {
         createKbObjectWidget(name, classname, icon);
@@ -553,11 +560,7 @@ void RadarCanvas::createKbObjectWidget(
   const std::string & path)
 {
   KbObjectWidget * imageWidget = new KbObjectWidget(
-    name,
-    classname,
-    QString::fromStdString(path),
-    node_,
-    this);
+    name, classname, QString::fromStdString(path), node_, this);
   kbObjects_.push_back(imageWidget);
   imageWidget->pxPlace(mapFromGlobal(QCursor::pos()));
   imageWidget->show();
@@ -579,7 +582,8 @@ void RadarCanvas::dragMoveEvent(QDragMoveEvent * event)
 void RadarCanvas::dropEvent(QDropEvent * event)
 {
   if (event->source()) {
-    KbObjectWidget * draggedWidget = qobject_cast<KbObjectWidget *>(event->source());
+    KbObjectWidget * draggedWidget =
+      qobject_cast<KbObjectWidget *>(event->source());
     draggedWidget->pxPlace(event->pos());
     draggedWidget->show();
     event->acceptProposedAction();
