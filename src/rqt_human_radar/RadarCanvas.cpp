@@ -489,7 +489,7 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
           painter.drawText(bottomLeftCorner, distanceInfo);
         }
       } catch (tf2::TransformException & ex) {
-        RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
+        RCLCPP_DEBUG(node_->get_logger(), "%s", ex.what());
       }
     }
   }
