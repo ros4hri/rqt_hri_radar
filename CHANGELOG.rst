@@ -2,6 +2,11 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* less verbose output for failing person transforms
+* Contributors: Séverin Lemaignan
+
 2.2.0 (2024-10-15)
 ------------------
 * properly scale the robot and humans icons
