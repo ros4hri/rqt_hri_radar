@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.1 (2024-10-16)
+------------------
 * less verbose output for failing person transforms
 * Contributors: Séverin Lemaignan
 
