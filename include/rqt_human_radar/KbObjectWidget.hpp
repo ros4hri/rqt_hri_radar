@@ -85,6 +85,7 @@ private:
   // Reference frame
   std::optional<std::string> referenceFrame_;
 
+  // 'physical' position in meters; x is facing the robot
   double x_ = 0., y_ = 0.;
 
   // flag used at destruction time to clear

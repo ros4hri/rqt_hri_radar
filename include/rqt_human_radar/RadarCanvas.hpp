@@ -54,6 +54,9 @@
 #include <geometry_msgs/msg/vector3_stamped.hpp>
 
 #include "rqt_human_radar/KbObjectWidget.hpp"
+#include "rqt_human_radar/PersonWidget.hpp"
+
+#include "rqt_human_radar/concurrent_queue.hpp"
 
 namespace Ui
 {
@@ -194,7 +197,6 @@ private:
   std::shared_ptr<hri::HRIListener> hriListener_;
   std::shared_ptr<tf2_ros::TransformListener> tfListener_;
   std::shared_ptr<tf2_ros::Buffer> tfBuffer_;
-  geometry_msgs::msg::Vector3Stamped versor_;
 
   // Drawing and painting objects
   QPen rangePen_;
@@ -203,10 +205,11 @@ private:
 
   // Stores the image being drawn
   QImage robotImage_;
-  QImage humanIcon_;
-  bool robotImageFound, personImageFound;
-  std::string package_, robotImageFile_, personSvgFile_;
-  std::map<std::string, QPolygon> peoplePosition_;
+  bool robotImageFound;
+  std::string package_, robotImageFile_;
+  std::map<std::string, PersonWidget*> persons_;
+  concurrent_queue<hri::ConstPersonPtr> new_persons_;
+  concurrent_queue<std::string> removed_persons_;
 
   int pixelPerMeter_;
 
@@ -224,9 +227,6 @@ private:
 
   // Reference frame
   std::optional<std::string> referenceFrame_;
-
-  // List of humans
-  std::vector<std::string> persons_;
 
   std::vector<KbObjectWidget *> kbObjects_;
 

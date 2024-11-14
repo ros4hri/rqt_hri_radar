@@ -43,14 +43,12 @@
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <hri_msgs/msg/ids_list.hpp>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>  // For transforming geometry_msgs types
 
 
 using namespace std::chrono_literals;
 
 std::vector<double> SPECIAL_ANGLES = {0, 30, 60, 90, 120, 150, 180};
 const double ROBOT_SIZE = .15;   // physical size (in m) of the robot along its x-axis
-const double HUMAN_SIZE = .30;   // physical size (in m) of the human along its x-axis
 
 namespace rqt_human_radar
 {
@@ -133,7 +131,6 @@ RadarCanvas::RadarCanvas(
   try {
     package_ = ament_index_cpp::get_package_share_directory("rqt_human_radar");
     robotImageFile_ = package_ + "/res/tiagopro.svg";
-    personSvgFile_ = package_ + "/res/adult_standing_disengaging.svg";
   } catch (const std::exception & e) {
     RCLCPP_ERROR(
       node_->get_logger(),
@@ -144,15 +141,8 @@ RadarCanvas::RadarCanvas(
 
   robotImageFound = robotImage_.load(QString::fromStdString(robotImageFile_));
 
-  personImageFound =
-    humanIcon_.load(QString::fromStdString(personSvgFile_));
-
   if (!robotImageFound) {
     RCLCPP_WARN(node_->get_logger(), "Robot icon not found");
-  }
-
-  if (!personImageFound) {
-    RCLCPP_WARN(node_->get_logger(), "Person icon not found");
   }
 
   // xOffset is meant to be fixed, while yOffset depends
@@ -173,11 +163,6 @@ RadarCanvas::RadarCanvas(
   oddBrush_ = QBrush(lighterGrey);
   rangePen_ = QPen(midGrey);
 
-  // Initialization of a constant versor
-  // which is later used to orient person icons.
-  versor_.vector.x = 1.0;
-  versor_.vector.y = 0.0;
-  versor_.vector.z = 0.0;
 
   // Computation of the number of arcs to draw
   double distanceFromTopRightCorner =
@@ -207,13 +192,12 @@ RadarCanvas::~RadarCanvas() {}
 
 void RadarCanvas::onTrackedPerson(hri::ConstPersonPtr person)
 {
-  persons_.push_back(person->id());
+  new_persons_.push(person);
 }
 
 void RadarCanvas::onTrackedPersonLost(hri::ID id)
 {
-  auto person = std::find(persons_.begin(), persons_.end(), id);
-  persons_.erase(person);
+  removed_persons_.push(id);
 }
 
 bool RadarCanvas::isInFov(const QPoint & point) const
@@ -243,8 +227,33 @@ void RadarCanvas::enableSimulation(bool state)
 
 void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 {
-  double humanWidth = HUMAN_SIZE * pixelPerMeter_;
-  double humanHeight = humanWidth * humanIcon_.height() / humanIcon_.width();
+
+  if (!new_persons_.empty()) {
+
+    auto person = new_persons_.front();
+    new_persons_.pop();
+  
+    PersonWidget * personWidget = new PersonWidget(
+      person->id(), 
+      person->frame(), 
+      QString::fromStdString(package_ + "/res/adult.svg"),
+      QString::fromStdString(package_ + "/res/adult_selected.svg"),
+      tfBuffer_,
+      node_, 
+      this);
+    
+    persons_[person->id()] = personWidget;
+    personWidget->show();
+
+  }
+
+  if (!removed_persons_.empty()) {
+    auto id = removed_persons_.front();
+    removed_persons_.pop();
+    persons_[id]->deleteLater();
+    persons_.erase(id);
+  }
+
 
   double robotWidth = ROBOT_SIZE * pixelPerMeter_;
   double robotHeight = robotWidth * robotImage_.height() / robotImage_.width();
@@ -253,7 +262,6 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
   painter.setRenderHint(QPainter::Antialiasing);
   font_ = painter.font();
 
-  versor_.header.stamp = rclcpp::Time();
 
   // Ranges painting process
   painter.setPen(QPen(Qt::transparent));
@@ -364,136 +372,6 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
   painter.setBrush(QBrush(Qt::transparent));
   painter.setPen(QPen(Qt::black));
 
-  // Drawing people. Using person_<person_id> frames
-  // to define people's position and orientation
-  auto persons = hriListener_->getTrackedPersons();
-  peoplePosition_.clear();
-  for (auto & person : persons) {
-    geometry_msgs::msg::Vector3Stamped rotatedVersor;
-
-    std::string id = person.first;
-    std::string personFrame = person.second->frame();
-    versor_.header.frame_id = personFrame;
-    geometry_msgs::msg::TransformStamped personTrans;
-
-    if (referenceFrame_) {
-      try {
-        personTrans = tfBuffer_->lookupTransform(
-          *referenceFrame_, personFrame, rclcpp::Time(0),
-          rclcpp::Duration(std::chrono::nanoseconds(10ms)));
-        tf2::doTransform(versor_, rotatedVersor, personTrans);
-
-        double distance =
-          std::sqrt(
-          std::pow(personTrans.transform.translation.x, 2) +
-          std::pow(personTrans.transform.translation.y, 2));
-        double theta =
-          std::atan2(-(rotatedVersor.vector.y), -(rotatedVersor.vector.x));
-        theta += M_PI / 2;
-
-        // Left-handed rotation of the rectangle containing the person's icon
-        // to draw
-
-        // The rectangle used here is initially managed as it was
-        // centered in (0, 0) and subsequently translated.
-        // When referencing to "width" and "height", it is actually
-        // half of the width and height of the rectangle containing
-        // the person's icon.
-
-
-        double rotatedWidthX = (humanWidth / 2 * std::cos(theta));
-        double rotatedWidthY = (humanWidth / 2 * -std::sin(theta));
-
-
-        double rotatedHeightX =
-          (humanHeight / 2 * std::sin(theta));
-        double rotatedHeightY =
-          (humanHeight / 2 * std::cos(theta));
-
-        // Computing vertices of the rotated rectangle
-
-        double personRectTopLeftX =
-          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) -
-          rotatedHeightX - rotatedWidthX;
-        double personRectTopLeftY =
-          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) -
-          rotatedHeightY - rotatedWidthY;
-
-        double personRectBottomRightX =
-          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) +
-          rotatedHeightX + rotatedWidthX;
-        double personRectBottomRightY =
-          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) +
-          rotatedHeightY + rotatedWidthY;
-
-        double personRectBottomLeftX =
-          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) +
-          rotatedHeightX - rotatedWidthX;
-        double personRectBottomLeftY =
-          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) +
-          rotatedHeightY - rotatedWidthY;
-
-        double personRectTopRightX =
-          xOffset_ + (personTrans.transform.translation.x * pixelPerMeter_) -
-          rotatedHeightX + rotatedWidthX;
-        double personRectTopRightY =
-          yOffset_ - (personTrans.transform.translation.y * pixelPerMeter_) -
-          rotatedHeightY + rotatedWidthY;
-
-        QPointF topLeftCorner(personRectTopLeftX, personRectTopLeftY);
-        QPointF bottomRightCorner(personRectBottomRightX,
-          personRectBottomRightY);
-        QPointF bottomLeftCorner(personRectBottomLeftX, personRectBottomLeftY);
-        QPointF topRightCorner(personRectTopRightX, personRectTopRightY);
-
-        // Image translation and rotation (via QPainter methods)
-
-        painter.translate(topLeftCorner);
-        painter.rotate(-(theta * 180) / M_PI);
-
-        painter.drawImage(
-          QRectF(
-            QPointF(-humanWidth / 2, -humanHeight / 2),
-            QPointF(humanWidth / 2, humanHeight / 2)),
-          humanIcon_);
-
-        painter.rotate((theta * 180) / M_PI);
-        painter.translate(-topLeftCorner);
-
-        // Storing the person's containing polygon
-        // A rectangle object can not represent rotated rectangles
-
-        QVector<QPoint> points;
-        points.append(topLeftCorner.toPoint());
-        points.append(bottomLeftCorner.toPoint());
-        points.append(bottomRightCorner.toPoint());
-        points.append(topRightCorner.toPoint());
-
-        peoplePosition_.insert(
-          std::pair<std::string, QPolygon>(id, QPolygon(points)));
-
-        // Showing people ID when option selected in
-        // radar settings
-        // Showing people distance when clicking on them
-        QString identificator = QString::fromStdString(id);
-        if (showIds_) {
-          painter.drawText(bottomRightCorner, identificator);
-        }
-        if (idClicked_ == id) {
-          std::ostringstream distanceStream;
-          distanceStream << std::fixed << std::setprecision(2) << distance;
-          std::string distanceString = distanceStream.str();
-          QString distanceInfo =
-            QString::fromStdString("Distance: " + distanceString);
-          painter.drawText(bottomRightCorner, identificator);
-          painter.drawText(bottomLeftCorner, distanceInfo);
-        }
-      } catch (tf2::TransformException & ex) {
-        RCLCPP_DEBUG(node_->get_logger(), "%s", ex.what());
-      }
-    }
-  }
-
   painter.drawImage(
     QRectF(
       QPointF(xOffset_ - robotWidth / 2, yOffset_ - robotHeight / 2),
@@ -512,17 +390,8 @@ void RadarCanvas::resizeEvent([[maybe_unused]] QResizeEvent * event)
   }
 }
 
-void RadarCanvas::mousePressEvent(QMouseEvent * event)
+void RadarCanvas::mousePressEvent([[maybe_unused]] QMouseEvent * event)
 {
-  for (auto & elem : peoplePosition_) {
-    if (elem.second.containsPoint(
-        QPoint(event->x(), event->y()),
-        Qt::OddEvenFill))
-    {
-      idClicked_ = (idClicked_ != elem.first) ? elem.first : "";
-      return;  // No more than one clicked person at a time
-    }
-  }
 }
 
 void RadarCanvas::showContextMenu(const QPoint & pos)

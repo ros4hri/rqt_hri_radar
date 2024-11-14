@@ -35,6 +35,7 @@ set(rqt_human_radar_SRCS
     src/rqt_human_radar/Radar.cpp
     src/rqt_human_radar/RadarScene.cpp
     src/rqt_human_radar/RadarCanvas.cpp
+    src/rqt_human_radar/PersonWidget.cpp
     src/rqt_human_radar/KbObjectWidget.cpp
 )
 ###########
@@ -47,6 +48,7 @@ set(rqt_human_radar_HDRS
     include/rqt_human_radar/Radar.hpp
     include/rqt_human_radar/RadarScene.hpp
     include/rqt_human_radar/RadarCanvas.hpp
+    include/rqt_human_radar/PersonWidget.hpp
     include/rqt_human_radar/KbObjectWidget.hpp
 )
 ###########
