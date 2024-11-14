@@ -211,6 +211,11 @@ private:
   concurrent_queue<hri::ConstPersonPtr> new_persons_;
   concurrent_queue<std::string> removed_persons_;
 
+  // store here persons that have been detected, but do not have yet
+  // a face/body associated. They will be drawn as soon as they have
+  // a face/body.
+  std::set<hri::ConstPersonPtr> persons_backlog_;
+
   int pixelPerMeter_;
 
   int arcsToDraw_;

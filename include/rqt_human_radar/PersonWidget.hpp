@@ -25,6 +25,10 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/buffer.h>
 
+#include <hri/hri.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <hri_msgs/msg/ids_list.hpp>
+
 namespace rqt_human_radar
 {
 
@@ -34,10 +38,9 @@ class PersonWidget : public QSvgWidget
 
 public:
   PersonWidget(
-    const std::string & id,
-    const std::string & frame,
-    const QString & svgFile,
-    const QString & svgFileSelected,
+    hri::ConstPersonPtr person,
+    std::shared_ptr<hri::HRIListener> hriListener,
+    const QString & resource_path,
     std::shared_ptr<tf2_ros::Buffer>,
     rclcpp::Node::SharedPtr,
     QWidget * parent = nullptr);
@@ -48,6 +51,7 @@ public:
   bool selected() { return selected_; }
   void setShowId(bool show_id) { show_id_ = show_id; }
 
+  bool isVisuallyTracked() const { return person_->face() || person_->body(); }
   //void updateKbVisibility() const;
 
 
@@ -65,7 +69,13 @@ private:
 
   void updateGeometry(QPainter&);
 
+  void toggleVoice(bool);
+  void setSpeaking(bool);
+
+  hri::ConstPersonPtr person_;
+  std::shared_ptr<hri::HRIListener> hriListener_;
   std::string id_;
+  std::string voice_id_;
   std::string frame_;
   std::shared_ptr<tf2_ros::Buffer> tfBuffer_;
   rclcpp::Node::SharedPtr node_;
@@ -90,6 +100,11 @@ private:
 
   bool selected_ = false;
   bool show_id_ = true;
+
+
+  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr speaking_pub_;
+  rclcpp::Publisher<hri_msgs::msg::IdsList>::SharedPtr voices_list_pub_;
+
 };
 
 }  // namespace rqt_human_radar

@@ -43,6 +43,7 @@
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <hri_msgs/msg/ids_list.hpp>
+#include <hri_msgs/msg/ids_match.hpp>
 
 
 using namespace std::chrono_literals;
@@ -232,26 +233,98 @@ void RadarCanvas::paintEvent([[maybe_unused]] QPaintEvent * event)
 
     auto person = new_persons_.front();
     new_persons_.pop();
-  
-    PersonWidget * personWidget = new PersonWidget(
-      person->id(), 
-      person->frame(), 
-      QString::fromStdString(package_ + "/res/adult.svg"),
-      QString::fromStdString(package_ + "/res/adult_selected.svg"),
-      tfBuffer_,
-      node_, 
-      this);
-    
-    persons_[person->id()] = personWidget;
-    personWidget->show();
+    persons_backlog_.insert(person);
+  }
 
+
+  // iterate over the set of persons
+  for (auto it = persons_backlog_.begin(); it != persons_backlog_.end(); ) {
+
+    auto person = *it;
+
+    // only create a new person if it has a face or body
+    // (ie, voice-only persons are not displayed)
+    if (person->face() || person->body()) {
+
+
+      RCLCPP_INFO(
+        node_->get_logger(), "New person %s detected.",
+        person->id().c_str());
+
+
+      // if the person is currently anonymous, make it known
+
+      // first, wait for the 'anonymous' flag to be set
+      while (person->anonymous() == std::nullopt) {
+        std::this_thread::sleep_for(10ms);
+      }
+      if (*person->anonymous()) {
+
+        RCLCPP_INFO(
+          node_->get_logger(), "Person %s is anonymous. Creating a new, non-anonymous person.",
+          person->id().c_str());
+
+        rclcpp::Publisher<hri_msgs::msg::IdsMatch>::SharedPtr matcher_pub_;
+        matcher_pub_ = node_->create_publisher<hri_msgs::msg::IdsMatch>(
+          "/humans/candidate_matches",
+          10);
+        hri_msgs::msg::IdsMatch match;
+
+        // we know by construction (cf RadarCanvas) that the person has either
+        // a face or a body
+        if (person->face()) {
+          match.id1 = person->face()->id();
+          match.id1_type = hri_msgs::msg::IdsMatch::FACE;
+        } else {
+          match.id1 = person->body()->id();
+          match.id1_type = hri_msgs::msg::IdsMatch::BODY;
+        }
+
+        match.id2 = "person_" + match.id1;
+        match.id2_type = hri_msgs::msg::IdsMatch::PERSON;
+        match.confidence = 1.0;
+        matcher_pub_->publish(match);
+
+      } else {
+
+        PersonWidget * personWidget = new PersonWidget(
+          person,
+          hriListener_,
+          QString::fromStdString(package_ + "/res/"),
+          tfBuffer_,
+          node_,
+          this);
+
+        persons_[person->id()] = personWidget;
+        personWidget->show();
+
+      }
+
+      it = persons_backlog_.erase(it);
+
+
+    } else {
+      it++;
+    }
+  }
+
+  // mark persons without a face/body for deletion
+  for (auto & person : persons_) {
+    if (!person.second->isVisuallyTracked()) {
+      removed_persons_.push(person.first);
+    }
   }
 
   if (!removed_persons_.empty()) {
     auto id = removed_persons_.front();
     removed_persons_.pop();
-    persons_[id]->deleteLater();
-    persons_.erase(id);
+
+    if (persons_.find(id) != persons_.end()) {
+      persons_[id]->deleteLater();
+      persons_.erase(id);
+      RCLCPP_INFO(
+        node_->get_logger(), "Person %s gone. Removing it.", id.c_str());
+    }
   }
 
 
