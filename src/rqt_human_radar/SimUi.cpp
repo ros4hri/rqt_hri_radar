@@ -12,49 +12,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-/**
- * @file RadarCanvas.hpp
- * @brief Definition of the methods declared in RadarScene.hpp
- */
-
+#include <QGraphicsView>
 #include <QResizeEvent>
 #include <QSizePolicy>
 #include <QSpinBox>
 
-#include "rqt_human_radar/RadarScene.hpp"
-#include "rqt_human_radar/RadarCanvas.hpp"
+#include "rqt_human_radar/InteractiveView.hpp"
+#include "rqt_human_radar/SimScene.hpp"
+#include "rqt_human_radar/SimUi.hpp"
 
 #include "./ui_radar_tabs.h"
 
 namespace rqt_human_radar
 {
 
-RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
+SimUi::SimUi(QWidget * parent, rclcpp::Node::SharedPtr node)
 : QWidget(parent), ui_(new Ui::RadarTabs()), node_(node)
 {
   ui_->setupUi(this);
 
-  RadarCanvas * radarCanvas = new RadarCanvas(this, ui_, node_);
-  ui_->radarCanvas = radarCanvas;
+  auto scene = new SimScene(node);
+  auto simView = new InteractiveView(this);
+  simView->setScene(scene);
+
+  ui_->radarCanvas = simView;
+
+  simView->resetView();
 
   if (ui_->objectsSimCheckbox->isChecked()) {
     ui_->simHelpLabel->show();
+    ui_->clearPersonsBtn->show();
     ui_->clearObjectsBtn->show();
-    radarCanvas->enableSimulation(true);
+    scene->enableSimulation(true);
   } else {
     ui_->simHelpLabel->hide();
+    ui_->clearPersonsBtn->hide();
     ui_->clearObjectsBtn->hide();
-    radarCanvas->enableSimulation(false);
+    scene->enableSimulation(false);
   }
 
-
   // Initial value of showFov
-  radarCanvas->showFov(ui_->fovCheckbox->isChecked());
-  radarCanvas->setFov(ui_->fov->value());
+  scene->showFov(ui_->fovCheckbox->isChecked());
+  scene->setFov(ui_->fov->value());
 
   // Initial value of showIDs
-  radarCanvas->showIds(ui_->idsCheckbox->isChecked());
+  scene->showIds(ui_->idsCheckbox->isChecked());
+
+  connect(
+    ui_->clearPersonsBtn, &QPushButton::clicked,
+    [ = ]() {scene->clearPersons();});
+
+  connect(
+    ui_->clearObjectsBtn, &QPushButton::clicked,
+    [ = ]() {scene->clearObjects();});
+
+  connect(
+    ui_->resetViewBtn, &QPushButton::clicked,
+    [ = ]() {simView->resetView();});
 
   connect(
     ui_->settingsBtn, &QPushButton::clicked, [ = ]() {
@@ -68,46 +82,37 @@ RadarScene::RadarScene(QWidget * parent, rclcpp::Node::SharedPtr node)
     });
 
   connect(
-    ui_->zoomIn, &QPushButton::clicked, [ = ]() {
-      ui_->zoomLevel->setValue(ui_->zoomLevel->value() + ui_->zoomLevel->singleStep());
-    });
-
-  connect(
-    ui_->zoomOut, &QPushButton::clicked, [ = ]() {
-      ui_->zoomLevel->setValue(ui_->zoomLevel->value() - ui_->zoomLevel->singleStep());
-    });
-
-  connect(
     ui_->fovCheckbox, &QCheckBox::stateChanged, [ = ](int state) {
       ui_->fov->setEnabled(state);
-      radarCanvas->showFov(state);
+      scene->showFov(state);
     });
   connect(
-    ui_->fov, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [ = ](int value) {
-      radarCanvas->setFov(value);
-    });
+    ui_->fov,
+    static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+    [ = ](int value) {scene->setFov(value);});
 
   connect(
-    ui_->idsCheckbox, &QCheckBox::stateChanged, [ = ](int state) {
-      radarCanvas->showIds(state);
-    });
+    ui_->idsCheckbox, &QCheckBox::stateChanged,
+    [ = ](int state) {scene->showIds(state);});
 
   connect(
     ui_->objectsSimCheckbox, &QCheckBox::stateChanged, [ = ](int state) {
-      radarCanvas->enableSimulation(state);
+      scene->enableSimulation(state);
       if (state) {
         ui_->simHelpLabel->show();
+        ui_->clearPersonsBtn->show();
         ui_->clearObjectsBtn->show();
       } else {
         ui_->simHelpLabel->hide();
+        ui_->clearPersonsBtn->hide();
         ui_->clearObjectsBtn->hide();
       }
     });
 }
 
-RadarScene::~RadarScene() {delete ui_;}
+SimUi::~SimUi() {delete ui_;}
 
-void RadarScene::showRadarCanvas()
+void SimUi::showRadarCanvas()
 {
   if (ui_->stackedWidget->currentIndex() == 0) {
     ui_->radarCanvas->show();
@@ -116,13 +121,13 @@ void RadarScene::showRadarCanvas()
   }
 }
 
-void RadarScene::resizeEvent([[maybe_unused]] QResizeEvent * event)
+void SimUi::resizeEvent([[maybe_unused]] QResizeEvent * event)
 {
   ui_->radarCanvas->setGeometry(
     ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));
 }
 
-void RadarScene::showEvent([[maybe_unused]] QShowEvent * event)
+void SimUi::showEvent([[maybe_unused]] QShowEvent * event)
 {
   ui_->radarCanvas->setGeometry(
     ui_->stackedWidget->geometry().adjusted(1, 1, -1, -1));

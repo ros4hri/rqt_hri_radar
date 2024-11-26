@@ -63,49 +63,34 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="zoomOut">
+       <widget class="QPushButton" name="clearPersonsBtn">
         <property name="text">
-         <string/>
+         <string>Clear simulated persons</string>
         </property>
         <property name="icon">
-         <iconset theme="zoom-out">
-          <normaloff>.</normaloff>.</iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <iconset theme="edit-clear"/>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="zoomLevel">
-        <property name="minimum">
-         <number>100</number>
+       <widget class="QPushButton" name="clearObjectsBtn">
+        <property name="text">
+         <string>Clear simulated objects</string>
         </property>
-        <property name="maximum">
-         <number>500</number>
-        </property>
-        <property name="singleStep">
-         <number>20</number>
-        </property>
-        <property name="value">
-         <number>300</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+        <property name="icon">
+         <iconset theme="edit-clear"/>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="zoomIn">
+       <widget class="QLabel" name="simHelpLabel">
+        <property name="font">
+         <font>
+          <italic>true</italic>
+         </font>
+        </property>
         <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset theme="zoom-in">
-          <normaloff>.</normaloff>.</iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <string>(right click on radar to insert objects)</string>
         </property>
        </widget>
       </item>
@@ -123,25 +108,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="simHelpLabel">
-        <property name="font">
-         <font>
-          <italic>true</italic>
-         </font>
-        </property>
+       <widget class="QPushButton" name="resetViewBtn">
         <property name="text">
-         <string>(right click on radar to insert objects)</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="clearObjectsBtn">
-        <property name="text">
-         <string>Clear objects</string>
-        </property>
-        <property name="icon">
-         <iconset theme="edit-clear">
-          <normaloff>.</normaloff>.</iconset>
+         <string>Reset view</string>
         </property>
        </widget>
       </item>
@@ -151,8 +120,7 @@
          <string>Settings</string>
         </property>
         <property name="icon">
-         <iconset theme="preferences-system">
-          <normaloff>.</normaloff>.</iconset>
+         <iconset theme="preferences-system"/>
         </property>
        </widget>
       </item>
@@ -171,7 +139,7 @@
       <enum>QFrame::Box</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="radarPage">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -249,8 +217,7 @@
             <string>get available frames</string>
            </property>
            <property name="icon">
-            <iconset theme="reload">
-             <normaloff>.</normaloff>.</iconset>
+            <iconset theme="reload"/>
            </property>
           </widget>
          </item>
@@ -336,6 +303,9 @@
            <property name="text">
             <string>enable objects simulation</string>
            </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
         </layout>
@@ -371,6 +341,7 @@
   <tabstop>refFrameComboBox</tabstop>
   <tabstop>reloadButton</tabstop>
   <tabstop>doneSettingsBtn</tabstop>
+  <tabstop>clearPersonsBtn</tabstop>
   <tabstop>clearObjectsBtn</tabstop>
  </tabstops>
  <resources/>

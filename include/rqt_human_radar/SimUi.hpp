@@ -12,20 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
 
-/**
- * @file RadarScene.hpp
- * @brief RadarScene class and methods declaration.
- */
-
-#ifndef RQT_HUMAN_RADAR__RADARSCENE_HPP_
-#define RQT_HUMAN_RADAR__RADARSCENE_HPP_
-
+#include <QTimer>
 #include <QWidget>
 
 #include <rclcpp/rclcpp.hpp>
-
-#include "rqt_human_radar/RadarCanvas.hpp"
 
 namespace Ui
 {
@@ -35,7 +27,7 @@ class RadarTabs;
 namespace rqt_human_radar
 {
 
-class RadarScene : public QWidget
+class SimUi : public QWidget
 {
   Q_OBJECT
 
@@ -43,11 +35,11 @@ public:
   /**
    * @brief Constructor
    */
-  explicit RadarScene(QWidget * parent = 0, rclcpp::Node::SharedPtr node = nullptr);
+  explicit SimUi(QWidget * parent = 0, rclcpp::Node::SharedPtr node = nullptr);
   /**
    * @brief Destructor
    */
-  virtual ~RadarScene();
+  virtual ~SimUi();
 
 public slots:
   /**
@@ -73,7 +65,8 @@ private:
 
   // ROS 2 node
   rclcpp::Node::SharedPtr node_;
+
+  QTimer timer_;
 };
 
 }  // namespace rqt_human_radar
-#endif  // RQT_HUMAN_RADAR__RADARSCENE_HPP_

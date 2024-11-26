@@ -21,8 +21,7 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
-#include <rqt_human_radar/RadarCanvas.hpp>
-#include <rqt_human_radar/RadarScene.hpp>
+#include <rqt_human_radar/SimUi.hpp>
 
 namespace rqt_human_radar
 {
@@ -37,7 +36,7 @@ Radar::~Radar() {}
 
 void Radar::initPlugin(qt_gui_cpp::PluginContext & context)
 {
-  widget_ = new RadarScene(0, node_);
+  widget_ = new SimUi(0, node_);
   widget_->setMinimumSize(600, 420);
   context.addWidget(widget_);
 }

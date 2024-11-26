@@ -33,10 +33,17 @@ endif()
 ###########
 set(rqt_human_radar_SRCS
     src/rqt_human_radar/Radar.cpp
-    src/rqt_human_radar/RadarScene.cpp
-    src/rqt_human_radar/RadarCanvas.cpp
-    src/rqt_human_radar/PersonWidget.cpp
-    src/rqt_human_radar/KbObjectWidget.cpp
+    src/rqt_human_radar/SimUi.cpp
+    src/rqt_human_radar/InteractiveView.cpp
+    src/rqt_human_radar/SimScene.cpp
+    src/rqt_human_radar/SemanticObject.cpp
+    src/rqt_human_radar/SimItem.cpp
+    src/rqt_human_radar/PersonItem.cpp
+    src/rqt_human_radar/LocalObjectItem.cpp
+    src/rqt_human_radar/RemoteObjectItem.cpp
+    src/rqt_human_radar/RemotePersonItem.cpp
+    src/rqt_human_radar/LocalPersonItem.cpp
+    src/rqt_human_radar/FieldOfViewItem.cpp
 )
 ###########
 
@@ -46,10 +53,17 @@ set(rqt_human_radar_SRCS
 ###########
 set(rqt_human_radar_HDRS
     include/rqt_human_radar/Radar.hpp
-    include/rqt_human_radar/RadarScene.hpp
-    include/rqt_human_radar/RadarCanvas.hpp
-    include/rqt_human_radar/PersonWidget.hpp
-    include/rqt_human_radar/KbObjectWidget.hpp
+    include/rqt_human_radar/SimUi.hpp
+    include/rqt_human_radar/InteractiveView.hpp
+    include/rqt_human_radar/SimScene.hpp
+    include/rqt_human_radar/SemanticObject.hpp
+    include/rqt_human_radar/SimItem.hpp
+    include/rqt_human_radar/PersonItem.hpp
+    include/rqt_human_radar/LocalObjectItem.hpp
+    include/rqt_human_radar/RemoteObjectItem.hpp
+    include/rqt_human_radar/RemotePersonItem.hpp
+    include/rqt_human_radar/LocalPersonItem.hpp
+    include/rqt_human_radar/FieldOfViewItem.hpp
 )
 ###########
 
