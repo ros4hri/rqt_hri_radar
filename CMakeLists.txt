@@ -51,19 +51,21 @@ set(rqt_human_radar_SRCS
 ###########
 # headers #
 ###########
+
+# only the QObject derived classes need to be listed here
 set(rqt_human_radar_HDRS
     include/rqt_human_radar/Radar.hpp
     include/rqt_human_radar/SimUi.hpp
     include/rqt_human_radar/InteractiveView.hpp
     include/rqt_human_radar/SimScene.hpp
-    include/rqt_human_radar/SemanticObject.hpp
-    include/rqt_human_radar/SimItem.hpp
-    include/rqt_human_radar/PersonItem.hpp
-    include/rqt_human_radar/LocalObjectItem.hpp
-    include/rqt_human_radar/RemoteObjectItem.hpp
-    include/rqt_human_radar/RemotePersonItem.hpp
-    include/rqt_human_radar/LocalPersonItem.hpp
-    include/rqt_human_radar/FieldOfViewItem.hpp
+    # include/rqt_human_radar/SemanticObject.hpp
+    # include/rqt_human_radar/SimItem.hpp
+    # include/rqt_human_radar/PersonItem.hpp
+    # include/rqt_human_radar/LocalObjectItem.hpp
+    # include/rqt_human_radar/RemoteObjectItem.hpp
+    # include/rqt_human_radar/RemotePersonItem.hpp
+    # include/rqt_human_radar/LocalPersonItem.hpp
+    # include/rqt_human_radar/FieldOfViewItem.hpp
 )
 ###########
 
