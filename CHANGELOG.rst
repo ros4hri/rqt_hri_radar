@@ -2,6 +2,16 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [cmake] remove headers that do not need MOC processing
+* Major refactor, using QGraphicsScene/QGraphicsView
+  This removes a lot of code related to zooming/drag&drop, etc
+  This refactoring leads to new features, including:
+  - fields of view for all agents
+  - new 'simulated' human
+* Contributors: Séverin Lemaignan
+
 2.2.1 (2024-10-16)
 ------------------
 * less verbose output for failing person transforms
