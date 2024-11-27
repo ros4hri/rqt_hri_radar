@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.0 (2024-11-27)
+------------------
 * [cmake] remove headers that do not need MOC processing
 * Major refactor, using QGraphicsScene/QGraphicsView
   This removes a lot of code related to zooming/drag&drop, etc
