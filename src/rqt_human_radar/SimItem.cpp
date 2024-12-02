@@ -23,6 +23,17 @@ namespace rqt_human_radar
 SimItem::SimItem(rclcpp::Node::SharedPtr node, const std::string & svg_file)
 : QGraphicsSvgItem(QString::fromStdString(svg_file)), node_(node)
 {
+  init();
+}
+
+SimItem::SimItem(rclcpp::Node::SharedPtr node)
+: QGraphicsSvgItem(), node_(node)
+{
+  init();
+}
+
+void SimItem::init()
+{
   label_ = new QGraphicsSimpleTextItem();
   label_->setFlags(QGraphicsItem::ItemIgnoresTransformations);
   label_->setText("no label");

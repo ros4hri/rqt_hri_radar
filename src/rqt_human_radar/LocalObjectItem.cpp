@@ -40,10 +40,31 @@ LocalObjectItem::LocalObjectItem(
   reference_frame_id_(reference_frame_id),
   animation_(new QPropertyAnimation(this, "pos"))
 {
+  init();
+}
+
+LocalObjectItem::LocalObjectItem(
+  rclcpp::Node::SharedPtr node,
+  const std::string & name,
+  const std::string & classname,
+  const std::string & reference_frame_id,
+  bool randomize_id)
+: SimItem(node),
+  SemanticObject(node, name, classname, randomize_id),
+  node_(node),
+  frame_id_(id_),
+  reference_frame_id_(reference_frame_id),
+  animation_(new QPropertyAnimation(this, "pos"))
+{
+  init();
+}
+
+void LocalObjectItem::init()
+{
   setFlag(QGraphicsItem::ItemIsMovable);
   setLabel(id_);
 
-  setPhysicalWidth(0.2);  // 20cm
+  setPhysicalWidth(0.2);   // 20cm
 
   animation_->setDuration(1000);
   animation_->setEasingCurve(QEasingCurve::InOutQuad);
@@ -128,8 +149,8 @@ void LocalObjectItem::moveTo(const geometry_msgs::msg::PoseStamped::SharedPtr ne
     QMetaObject::invokeMethod(
       this, [this, newPosition]() {
         animation_->stop();
-        animation_->setStartValue(pos());  // Current position
-        animation_->setEndValue(newPosition);  // Target position
+        animation_->setStartValue(pos());   // Current position
+        animation_->setEndValue(newPosition);   // Target position
         animation_->start();
       });
   } catch (const tf2::TransformException & ex) {

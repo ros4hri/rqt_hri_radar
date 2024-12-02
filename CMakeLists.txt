@@ -19,8 +19,7 @@ project(rqt_human_radar)
 # Dependencies
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Svg REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Svg Xml)
 
 if(WIN32)
   message(STATUS "rqt_human_radar is not yet supported on Windows. Package will not be built.")
@@ -38,6 +37,7 @@ set(rqt_human_radar_SRCS
     src/rqt_human_radar/SimScene.cpp
     src/rqt_human_radar/SemanticObject.cpp
     src/rqt_human_radar/SimItem.cpp
+    src/rqt_human_radar/EnvironmentLoader.cpp
     src/rqt_human_radar/PersonItem.cpp
     src/rqt_human_radar/LocalObjectItem.cpp
     src/rqt_human_radar/RemoteObjectItem.cpp
@@ -90,7 +90,7 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
         ${rqt_human_radar_MOCS}
         ${rqt_human_radar_UIS_H}
 )
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg Qt5::Xml)
 
 ament_export_libraries(${PROJECT_NAME})
 

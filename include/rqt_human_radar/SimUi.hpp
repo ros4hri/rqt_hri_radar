@@ -18,6 +18,7 @@
 #include <QWidget>
 
 #include <rclcpp/rclcpp.hpp>
+#include "rqt_human_radar/EnvironmentLoader.hpp"
 
 namespace Ui
 {
@@ -65,6 +66,8 @@ private:
 
   // ROS 2 node
   rclcpp::Node::SharedPtr node_;
+
+  EnvironmentLoader environment_loader_;
 
   QTimer timer_;
 };

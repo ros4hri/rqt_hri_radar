@@ -16,6 +16,10 @@
 #include <QResizeEvent>
 #include <QSizePolicy>
 #include <QSpinBox>
+#include <QFileDialog>
+#include <QFile>
+#include <QMessageBox>
+
 
 #include "rqt_human_radar/InteractiveView.hpp"
 #include "rqt_human_radar/SimScene.hpp"
@@ -43,11 +47,15 @@ SimUi::SimUi(QWidget * parent, rclcpp::Node::SharedPtr node)
     ui_->simHelpLabel->show();
     ui_->clearPersonsBtn->show();
     ui_->clearObjectsBtn->show();
+    ui_->downloadTplBtn->setEnabled(true);
+    ui_->loadMapBtn->setEnabled(true);
     scene->enableSimulation(true);
   } else {
     ui_->simHelpLabel->hide();
     ui_->clearPersonsBtn->hide();
     ui_->clearObjectsBtn->hide();
+    ui_->downloadTplBtn->setEnabled(false);
+    ui_->loadMapBtn->setEnabled(false);
     scene->enableSimulation(false);
   }
 
@@ -75,10 +83,43 @@ SimUi::SimUi(QWidget * parent, rclcpp::Node::SharedPtr node)
       ui_->stackedWidget->setCurrentIndex(1);
       ui_->radarCanvas->hide();
     });
+
   connect(
     ui_->doneSettingsBtn, &QPushButton::clicked, [ = ]() {
       ui_->stackedWidget->setCurrentIndex(0);
       ui_->radarCanvas->show();
+    });
+
+  connect(
+    ui_->loadMapBtn, &QPushButton::clicked, [ = ]() {
+      auto fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Open SVG environment"), "", "SVG environment (*.svg)");
+      environment_loader_.loadMap(node_, scene, fileName.toStdString());
+    });
+
+  connect(
+    ui_->downloadTplBtn, &QPushButton::clicked, [ = ]() {
+      auto tpl = QString::fromStdString(scene->package_path() + "/res/map.svg");
+
+      auto destinationFilePath = QFileDialog::getSaveFileName(
+        this,
+        tr("Save SVG template as"), QDir::homePath(), "SVG environment (*.svg)");
+
+      if (destinationFilePath.isEmpty()) {
+        return;
+      }
+      // Copy the file to the selected location
+      QFile sourceFile(tpl);
+      if (sourceFile.exists()) {
+        if (QFile::copy(tpl, destinationFilePath)) {
+          QMessageBox::information(nullptr, "Success", "Template downloaded successfully!");
+        } else {
+          QMessageBox::critical(nullptr, "Error", "Failed to save the template.");
+        }
+      } else {
+        QMessageBox::critical(nullptr, "Error", "Source template file does not exist.");
+      }
     });
 
   connect(
@@ -102,10 +143,14 @@ SimUi::SimUi(QWidget * parent, rclcpp::Node::SharedPtr node)
         ui_->simHelpLabel->show();
         ui_->clearPersonsBtn->show();
         ui_->clearObjectsBtn->show();
+        ui_->downloadTplBtn->setEnabled(true);
+        ui_->loadMapBtn->setEnabled(true);
       } else {
         ui_->simHelpLabel->hide();
         ui_->clearPersonsBtn->hide();
         ui_->clearObjectsBtn->hide();
+        ui_->downloadTplBtn->setEnabled(false);
+        ui_->loadMapBtn->setEnabled(false);
       }
     });
 }

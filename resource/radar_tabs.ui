@@ -139,7 +139,7 @@
       <enum>QFrame::Box</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="radarPage">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -305,6 +305,30 @@
            </property>
            <property name="checked">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QPushButton" name="downloadTplBtn">
+           <property name="text">
+            <string>Download environment SVG template</string>
+           </property>
+           <property name="icon">
+            <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="loadMapBtn">
+           <property name="text">
+            <string>Load environment (SVG)</string>
+           </property>
+           <property name="icon">
+            <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
            </property>
           </widget>
          </item>

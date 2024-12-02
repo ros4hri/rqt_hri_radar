@@ -34,6 +34,7 @@ public:
   enum { Type = UserType + 1 };
 
   SimItem(rclcpp::Node::SharedPtr node, const std::string & svg_file);
+  SimItem(rclcpp::Node::SharedPtr node);
 
   /**
    * @brief Set the size of the object in meters.
@@ -53,6 +54,7 @@ public:
   void showLabel(bool show) {show ? label_->show() : label_->hide();}
 
 protected:
+  void init();
   rclcpp::Node::SharedPtr node_;
   double physical_width_ = 1.0;  // m
 

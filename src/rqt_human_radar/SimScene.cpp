@@ -65,6 +65,7 @@ SimScene::SimScene(rclcpp::Node::SharedPtr node)
   addItem(robotItem);
   robotItem->setPhysicalWidth(0.2);  // 20cm
 
+
   updateTimer_ = new QTimer(this);
   connect(updateTimer_, &QTimer::timeout, this, &SimScene::updatePersons);
   updateTimer_->start(50);  // milliseconds

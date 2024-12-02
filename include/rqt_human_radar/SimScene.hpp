@@ -61,6 +61,8 @@ public slots:
   void clearPersons();
   void clearObjects();
 
+  std::string package_path() const {return package_;}
+
 protected:
   void drawBackground(QPainter * painter, const QRectF & rect) override;
   void contextMenuEvent(QGraphicsSceneContextMenuEvent * event) override;
@@ -90,6 +92,7 @@ private:
   // a face/body associated. They will be drawn as soon as they have
   // a face/body.
   std::set<hri::ConstPersonPtr> persons_backlog_;
+
 
   QTimer * updateTimer_;
 };

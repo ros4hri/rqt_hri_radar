@@ -45,7 +45,13 @@ public:
   LocalObjectItem(
     rclcpp::Node::SharedPtr node, const std::string & name,
     const std::string & svg_file,
-    const std::string & classname = "oro:Object",
+    const std::string & classname,
+    const std::string & reference_frame_id = "base_link",
+    bool randomize_id = false);
+
+  LocalObjectItem(
+    rclcpp::Node::SharedPtr node, const std::string & name,
+    const std::string & classname,
     const std::string & reference_frame_id = "base_link",
     bool randomize_id = false);
 
@@ -58,6 +64,7 @@ protected:
   void mouseMoveEvent(QGraphicsSceneMouseEvent * event) override;
 
 private:
+  void init();
   void publishTF();
   void moveTo(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
