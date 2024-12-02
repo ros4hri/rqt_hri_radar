@@ -20,6 +20,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include "rqt_human_radar/LocalObjectItem.hpp"
 #include "rqt_human_radar/SimScene.hpp"
+#include "rqt_human_radar/SPOEditor.hpp"
 
 using namespace std::chrono_literals;
 
@@ -96,12 +97,27 @@ LocalObjectItem::~LocalObjectItem()
 void LocalObjectItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
 {
   QMenu menu;
+  QAction * rdfEditAction = menu.addAction("Edit RDF properties");
+  menu.addSeparator();
   QAction * deleteAction = menu.addAction("Delete");
+
   QAction * selectedAction = menu.exec(event->screenPos());
-  if (selectedAction == deleteAction) {
+
+  if (selectedAction == rdfEditAction) {
+
+    auto rdfDialog = new SPOEditor(id_);
+
+    rdfDialog->setTriples(getStaticTriples());
+
+    if (rdfDialog->exec() == QDialog::Accepted) {
+      updateStaticTriples(rdfDialog->getTriples());
+    }
+
+  } else if (selectedAction == deleteAction) {
     scene()->removeItem(this);
     delete this;
   }
+
 }
 
 void LocalObjectItem::publishTF()

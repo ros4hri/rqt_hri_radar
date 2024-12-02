@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <tuple>
+#include <vector>
 #include <string>
 
 #include <rclcpp/rclcpp.hpp>
@@ -21,6 +23,9 @@
 
 namespace rqt_human_radar
 {
+
+typedef std::tuple<std::string, std::string, std::string> Triple;
+
 /** @brief A semantic object in the simulation
  *
  *  It holds a unique identifier, an ROS2 node handler,
@@ -41,6 +46,9 @@ public:
   void addProperty(const std::string & property, const std::string & value);
   void removeProperty(const std::string & property, const std::string & value);
 
+  std::vector<Triple> getStaticTriples() const {return static_triples_;}
+  void updateStaticTriples(const std::vector<Triple> & triples);
+
   static std::string generateRandomSuffix(size_t length = 5);
 
   std::string getId() const {return id_;}
@@ -53,6 +61,10 @@ protected:
   std::string id_;
 
 private:
+  static std_msgs::msg::String toMsg(const Triple & triple);
+
+  std::vector<Triple> static_triples_;
+
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr kb_add_pub_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr kb_remove_pub_;
