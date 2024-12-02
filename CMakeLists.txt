@@ -61,7 +61,7 @@ set(rqt_human_radar_HDRS
     # include/rqt_human_radar/SemanticObject.hpp
     # include/rqt_human_radar/SimItem.hpp
     # include/rqt_human_radar/PersonItem.hpp
-    # include/rqt_human_radar/LocalObjectItem.hpp
+    include/rqt_human_radar/LocalObjectItem.hpp
     # include/rqt_human_radar/RemoteObjectItem.hpp
     # include/rqt_human_radar/RemotePersonItem.hpp
     # include/rqt_human_radar/LocalPersonItem.hpp

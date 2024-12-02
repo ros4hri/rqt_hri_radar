@@ -15,13 +15,17 @@
 #pragma once
 
 #include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 
 #include <QGraphicsSceneContextMenuEvent>
 #include <QTimer>
+#include <QPropertyAnimation>
 #include <memory>
 #include <string>
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "SemanticObject.hpp"
@@ -30,8 +34,11 @@
 namespace rqt_human_radar
 {
 
-class LocalObjectItem : public SemanticObject, public SimItem
+class LocalObjectItem : public SimItem, public SemanticObject
 {
+  Q_OBJECT
+  Q_PROPERTY(QPointF pos READ pos WRITE setPos)
+
 public:
   enum { Type = UserType + 5 };
 
@@ -52,13 +59,21 @@ protected:
 
 private:
   void publishTF();
+  void moveTo(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
   rclcpp::Node::SharedPtr node_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pos_sub_;
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+
   std::string frame_id_;
   std::string reference_frame_id_;
 
   rclcpp::TimerBase::SharedPtr timer_;
+
+  QPropertyAnimation * animation_ = nullptr;
 };
 
 }  // namespace rqt_human_radar
