@@ -210,9 +210,9 @@ void SimScene::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
   // then, add objects
   // (user-facing name, OWL class name, icon path)
   const std::vector<std::tuple<std::string, std::string, std::string>> OBJECTS{
-    {"book", "oro:Book", package_ + "/res/icons/book-open-variant.svg"},
-    {"cup", "oro:Cup", package_ + "/res/icons/cup-water.svg"},
-    {"phone", "cyc:CellularTelephone", package_ + "/res/icons/cellphone.svg"},
+    {"book", "dbr:Book", package_ + "/res/icons/book-open-variant.svg"},
+    {"cup", "dbr:Cup", package_ + "/res/icons/cup-water.svg"},
+    {"phone", "dbr:Smartphone", package_ + "/res/icons/cellphone.svg"},
     {"apple", "dbr:Apple", package_ + "/res/icons/food-apple.svg"},
     {"pear", "dbr:Pear", package_ + "/res/icons/food-pear.svg"},
   };
