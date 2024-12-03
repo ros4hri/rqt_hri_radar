@@ -104,7 +104,6 @@ void LocalObjectItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
   QAction * selectedAction = menu.exec(event->screenPos());
 
   if (selectedAction == rdfEditAction) {
-
     auto rdfDialog = new SPOEditor(id_);
 
     rdfDialog->setTriples(getStaticTriples());
@@ -117,7 +116,6 @@ void LocalObjectItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
     scene()->removeItem(this);
     delete this;
   }
-
 }
 
 void LocalObjectItem::publishTF()

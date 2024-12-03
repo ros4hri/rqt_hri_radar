@@ -1,3 +1,17 @@
+// Copyright 2024 pal-robotics
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include <QDialog>
 #include <QTableWidget>
 #include <QVBoxLayout>
@@ -95,14 +109,12 @@ std::vector<Triple> SPOEditor::getTriples() const
     spo.push_back(std::make_tuple(subject, predicate, object));
   }
   return spo;
-
 }
 
 void SPOEditor::addRow(
   const QString & subject, const QString & predicate,
   const QString & object)
 {
-
   QString final_subject = QString::fromStdString(subject_);
   if (!subject.isEmpty()) {
     final_subject = subject;
@@ -113,15 +125,14 @@ void SPOEditor::addRow(
   tableWidget->insertRow(newRow);
 
   // Optionally set placeholders for new cells
-  tableWidget->setItem(newRow, 0, new QTableWidgetItem(final_subject));       // Subject
-  tableWidget->setItem(newRow, 2, new QTableWidgetItem(object));       // Object
+  tableWidget->setItem(newRow, 0, new QTableWidgetItem(final_subject));
+  tableWidget->setItem(newRow, 2, new QTableWidgetItem(object));
 
   QComboBox * predicateComboBox = new QComboBox(this);
-  predicateComboBox->setEditable(true);       // Allow user to type in new predicates
+  predicateComboBox->setEditable(true);  // Allow user to type in new predicates
   predicateComboBox->addItems(PREDICATES);
   predicateComboBox->setCurrentText(predicate);
   tableWidget->setCellWidget(newRow, 1, predicateComboBox);
-  //tableWidget->setItem(newRow, 1, new QTableWidgetItem(""));       // Predicate
 }
 
 

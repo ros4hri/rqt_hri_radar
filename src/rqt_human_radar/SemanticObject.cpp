@@ -94,37 +94,23 @@ std_msgs::msg::String SemanticObject::toMsg(const Triple & triple)
   return msg;
 }
 
-/** add & publish triples that are not yet in static_triples_; remove triples that are in static_triples_ but not in triples */
 void SemanticObject::updateStaticTriples(const std::vector<Triple> & triples)
 {
-
-  decltype(static_triples_) new_static_triples_;
-
   for (const auto & triple : triples) {
     if (std::find(
         static_triples_.begin(), static_triples_.end(),
         triple) == static_triples_.end())
     {
-
       kb_add_pub_->publish(toMsg(triple));
-
-      new_static_triples_.push_back(triple);
     }
   }
 
   for (const auto & triple : static_triples_) {
     if (std::find(triples.begin(), triples.end(), triple) == triples.end()) {
       kb_remove_pub_->publish(toMsg(triple));
-      static_triples_.erase(
-        std::remove(static_triples_.begin(), static_triples_.end(), triple),
-        static_triples_.end());
     }
   }
 
-  // add the new triples to the static triples
-  static_triples_.insert(
-    static_triples_.end(), new_static_triples_.begin(), new_static_triples_.end());
-
-
+  static_triples_ = triples;
 }
 }  // namespace rqt_human_radar

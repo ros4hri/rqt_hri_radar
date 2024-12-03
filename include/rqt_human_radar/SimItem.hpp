@@ -34,7 +34,7 @@ public:
   enum { Type = UserType + 1 };
 
   SimItem(rclcpp::Node::SharedPtr node, const std::string & svg_file);
-  SimItem(rclcpp::Node::SharedPtr node);
+  explicit SimItem(rclcpp::Node::SharedPtr node);
 
   /**
    * @brief Set the size of the object in meters.
