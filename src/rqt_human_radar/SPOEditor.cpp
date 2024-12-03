@@ -5,8 +5,19 @@
 #include <QPushButton>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QComboBox>
+#include <QStringList>
 
 #include "rqt_human_radar/SPOEditor.hpp"
+
+const QStringList PREDICATES {
+  "dbp:color",
+  "oro:isAt",
+  "oro:isOn",
+  "oro:contains",
+  "dbp:name",
+  "foaf:knows",
+};
 
 namespace rqt_human_radar
 {
@@ -15,7 +26,8 @@ SPOEditor::SPOEditor(
 )
 : QDialog(parent), subject_(subject)
 {
-  setWindowTitle("RDF properties");
+  setWindowTitle("RDF/OWL triples");
+  setFixedSize(500, 300);
 
   // Create the table widget
   tableWidget = new QTableWidget(this);
@@ -25,10 +37,10 @@ SPOEditor::SPOEditor(
   tableWidget->verticalHeader()->setVisible(false);       // Hide row headers
   tableWidget->setEditTriggers(QAbstractItemView::DoubleClicked);       // Enable in-place editing
 
-  QPushButton * addRowButton = new QPushButton("Add Row", this);
-  QPushButton * removeRowButton = new QPushButton("Remove Selected Row", this);
+  QPushButton * addRowButton = new QPushButton("Add row", this);
+  QPushButton * removeRowButton = new QPushButton("Remove selected row", this);
 
-  connect(addRowButton, &QPushButton::clicked, this, &SPOEditor::addRow);
+  connect(addRowButton, &QPushButton::clicked, this, &SPOEditor::addEmptyRow);
   connect(removeRowButton, &QPushButton::clicked, this, &SPOEditor::removeSelectedRow);
 
   QPushButton * okButton = new QPushButton("OK", this);
@@ -65,24 +77,10 @@ void SPOEditor::setTriples(const std::vector<Triple> & spo)
 
   // Add the triples to the table
   for (const auto & triple : spo) {
-    int newRow = tableWidget->rowCount();
-    tableWidget->insertRow(newRow);
-
-    tableWidget->setItem(
-      newRow, 0, new QTableWidgetItem(
-        QString::fromStdString(
-          std::get<0>(
-            triple))));                                                                                       // Subject
-    tableWidget->setItem(
-      newRow, 1, new QTableWidgetItem(
-        QString::fromStdString(
-          std::get<1>(
-            triple))));                                                                                       // Predicate
-    tableWidget->setItem(
-      newRow, 2, new QTableWidgetItem(
-        QString::fromStdString(
-          std::get<2>(
-            triple))));                                                                                       // Object
+    addRow(
+      QString::fromStdString(std::get<0>(triple)),
+      QString::fromStdString(std::get<1>(triple)),
+      QString::fromStdString(std::get<2>(triple)));
   }
 }
 
@@ -91,7 +89,8 @@ std::vector<Triple> SPOEditor::getTriples() const
   std::vector<Triple> spo;
   for (int row = 0; row < tableWidget->rowCount(); ++row) {
     std::string subject = tableWidget->item(row, 0)->text().toStdString();
-    std::string predicate = tableWidget->item(row, 1)->text().toStdString();
+    QComboBox * predicateComboBox = qobject_cast<QComboBox *>(tableWidget->cellWidget(row, 1));
+    std::string predicate = predicateComboBox->currentText().toStdString();
     std::string object = tableWidget->item(row, 2)->text().toStdString();
     spo.push_back(std::make_tuple(subject, predicate, object));
   }
@@ -99,16 +98,30 @@ std::vector<Triple> SPOEditor::getTriples() const
 
 }
 
-void SPOEditor::addRow()
+void SPOEditor::addRow(
+  const QString & subject, const QString & predicate,
+  const QString & object)
 {
+
+  QString final_subject = QString::fromStdString(subject_);
+  if (!subject.isEmpty()) {
+    final_subject = subject;
+  }
+
   // Add an empty row to the table
   int newRow = tableWidget->rowCount();
   tableWidget->insertRow(newRow);
 
   // Optionally set placeholders for new cells
-  tableWidget->setItem(newRow, 0, new QTableWidgetItem(QString::fromStdString(subject_)));       // Subject
-  tableWidget->setItem(newRow, 1, new QTableWidgetItem(""));       // Predicate
-  tableWidget->setItem(newRow, 2, new QTableWidgetItem(""));       // Object
+  tableWidget->setItem(newRow, 0, new QTableWidgetItem(final_subject));       // Subject
+  tableWidget->setItem(newRow, 2, new QTableWidgetItem(object));       // Object
+
+  QComboBox * predicateComboBox = new QComboBox(this);
+  predicateComboBox->setEditable(true);       // Allow user to type in new predicates
+  predicateComboBox->addItems(PREDICATES);
+  predicateComboBox->setCurrentText(predicate);
+  tableWidget->setCellWidget(newRow, 1, predicateComboBox);
+  //tableWidget->setItem(newRow, 1, new QTableWidgetItem(""));       // Predicate
 }
 
 

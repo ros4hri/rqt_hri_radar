@@ -22,10 +22,16 @@ public:
   std::vector<Triple> getTriples() const;
 
 private slots:
-  void addRow();
+  void addEmptyRow()
+  {
+    addRow();
+  }
   void removeSelectedRow();
 
 private:
+  void addRow(
+    const QString & subject = "", const QString & predicate = "",
+    const QString & object = "");
   QTableWidget * tableWidget;
 
   std::string subject_;
