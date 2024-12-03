@@ -111,11 +111,12 @@ SimUi::SimUi(QWidget * parent, rclcpp::Node::SharedPtr node)
       }
       // Copy the file to the selected location
       QFile sourceFile(tpl);
+      QFile destinationFile(destinationFilePath);
       if (sourceFile.exists()) {
-        if (QFile::copy(tpl, destinationFilePath)) {
-          QMessageBox::information(nullptr, "Success", "Template downloaded successfully!");
-        } else {
-          QMessageBox::critical(nullptr, "Error", "Failed to save the template.");
+        if (!destinationFile.exists() || destinationFile.remove() ) {
+          if (!QFile::copy(tpl, destinationFilePath)) {
+            QMessageBox::critical(nullptr, "Error", "Failed to save the template.");
+          }
         }
       } else {
         QMessageBox::critical(nullptr, "Error", "Source template file does not exist.");
