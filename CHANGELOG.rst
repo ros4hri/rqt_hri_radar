@@ -2,8 +2,8 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.0 (2024-12-09)
+------------------
 * svg template: escape parantheses in RDF class names
 * linting
 * environment laoder: ensure we can overwrite the template
