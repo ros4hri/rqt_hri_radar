@@ -2,6 +2,19 @@
 Changelog for package rqt_human_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* svg template: escape parantheses in RDF class names
+* linting
+* environment laoder: ensure we can overwrite the template
+* rdf editor: add optional drop down selection for predicates
+* update objects classes to DBpedia class names
+* add a RDF properties editor, attached to objects
+* load environments from SVG
+  See Settings > Downlaod template and Settings > Load environment
+* sim: locally added object can be externally moved by publishing to /interaction_sim/<id>/move_to
+* Contributors: Séverin Lemaignan
+
 2.3.0 (2024-11-27)
 ------------------
 * [cmake] remove headers that do not need MOC processing
